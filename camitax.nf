@@ -63,7 +63,7 @@ process to_ncbi_taxonomy {
 	file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
 
 	"""
-	#!/usr/bin/env python
+	#!/usr/bin/env python3
 
 	import gzip
 
