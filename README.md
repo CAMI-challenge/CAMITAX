@@ -7,7 +7,7 @@ Taxon labels for microbial genomes
 - [barrnap](https://github.com/tseemann/barrnap)
 - [bedtools](https://github.com/arq5x/bedtools2)
 - [R](https://www.r-project.org/) with [dada2](https://www.bioconductor.org/packages/release/bioc/html/dada2.html) and [Biostrings](https://www.bioconductor.org/packages/release/bioc/html/Biostrings.html)
-- [Python 3](https://www.python.org/)
+- [Python 3](https://www.python.org/) with [gzip](https://docs.python.org/3/library/gzip.html)
 
 Most of these can be easily installed with [conda](https://conda.io/miniconda.html); I'll add more detailed instructions soon.
 
