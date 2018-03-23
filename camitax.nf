@@ -91,6 +91,6 @@ process to_ncbi_taxonomy {
 						if taxon in name_to_ncbi_id:
 							ncbi_id = name_to_ncbi_id[taxon]
 							break;
-				g.write("{}\t{}\n".format(ncbi_id, ncbi_id_to_lineage[ncbi_id]))
+				g.write("{}\\t{}\\n".format(ncbi_id, ncbi_id_to_lineage[ncbi_id]))
 	"""
 }
