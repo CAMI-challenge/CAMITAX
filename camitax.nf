@@ -13,11 +13,6 @@ println """
 ░                                    ${camitax_version?:''}
 """
 
-// TODO Remove absolute paths FFS!
-silva_assignTaxonomy = file('/Users/abremges/GitHub/CAMITAX/db/dada2/silva_nr_v132_train_set.fa.gz')
-silva_assignSpecies = file('/Users/abremges/GitHub/CAMITAX/db/dada2/silva_species_assignment_v132.fa.gz')
-ncbi_taxonomy = file('/Users/abremges/GitHub/CAMITAX/db/taxonomy/rankedlineage.dmp.gz')
-
 genomes = Channel.fromPath("input/*.fasta").collect()
 genomes.subscribe { println "Input genomes: " + it }
 
@@ -59,7 +54,7 @@ process annotate_rRNA {
 	set.seed(42)
 
 	fastaFile <- readDNAStringSet("${fasta}")
-	tt <- addSpecies(assignTaxonomy(paste(fastaFile), "${silva_assignTaxonomy}"), "${silva_assignSpecies}")
+	tt <- addSpecies(assignTaxonomy(paste(fastaFile), "$baseDir/db/dada2/silva_nr_v132_train_set.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz")
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }
@@ -83,7 +78,7 @@ process to_ncbi_taxonomy {
 	name_to_ncbi_id = {}
 	ncbi_id_to_lineage = {}
 
-	with gzip.open("${ncbi_taxonomy}") as f:
+	with gzip.open("$baseDir/db/taxonomy/rankedlineage.dmp.gz") as f:
 		for line in f:
 			line = ''.join(line.decode('utf-8').rstrip().split('\t'))
 			taxa = line.split('|')
