@@ -80,10 +80,23 @@ process to_ncbi_taxonomy {
 	with gzip.open("$baseDir/db/taxonomy/rankedlineage.dmp.gz") as f:
 		for line in f:
 			line = ''.join(line.decode('utf-8').rstrip().split('\t'))
-			taxa = line.split('|')
-			del taxa[8] # Remove (empty) kingdom entry to match CAMI spec
-			name_to_ncbi_id[taxa[1]] = taxa[0]
-			ncbi_id_to_lineage[taxa[0]] = ';'.join(taxa[8:1:-1])
+			(id, name, species, genus, family, order, class_, phylum, _, superkingdom, _) = line.split('|')
+			if not superkingdom:
+				superkingdom = name
+			elif not phylum:
+				phylum = name
+			elif not class_:
+				class_ = name
+			elif not order:
+				order = name
+			elif not family:
+				family = name
+			elif not genus:
+				genus = name
+			elif not species:
+				species = name
+			name_to_ncbi_id[name] = id
+			ncbi_id_to_lineage[id] = "{};{};{};{};{};{};{}".format(superkingdom, phylum, class_, order, family, genus, species)
 
 	with open("${lineage}") as f:
 		with open("${lineage.baseName}.ncbi.txt", 'w') as g:
