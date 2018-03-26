@@ -54,7 +54,7 @@ process annotate_rRNA {
 	set.seed(42)
 
 	fastaFile <- readDNAStringSet("${fasta}")
-	tt <- addSpecies(assignTaxonomy(paste(fastaFile), "$baseDir/db/dada2/silva_nr_v132_train_set.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz")
+	tt <- addSpecies(assignTaxonomy(paste(fastaFile), "$baseDir/db/dada2/silva_nr_v132_train_set_bac_arc.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz")
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }
@@ -83,7 +83,7 @@ process to_ncbi_taxonomy {
 			taxa = line.split('|')
 			del taxa[8] # Remove (empty) kingdom entry to match CAMI spec
 			name_to_ncbi_id[taxa[1]] = taxa[0]
-			ncbi_id_to_lineage[taxa[0]] = ';'.join((taxa[8:1:-1]))
+			ncbi_id_to_lineage[taxa[0]] = ';'.join(taxa[8:1:-1])
 
 	with open("${lineage}") as f:
 		with open("${lineage.baseName}.ncbi.txt", 'w') as g:
@@ -91,6 +91,7 @@ process to_ncbi_taxonomy {
 				line = line.rstrip()
 				taxa = line.split(';')
 				ncbi_id = 1
+				lineage = ";;;;;;"
 				if ' '.join(taxa[-2:]) in name_to_ncbi_id:
 					ncbi_id = name_to_ncbi_id[' '.join(taxa[-2:])]
 				else:
@@ -98,6 +99,8 @@ process to_ncbi_taxonomy {
 						if taxon in name_to_ncbi_id:
 							ncbi_id = name_to_ncbi_id[taxon]
 							break;
-				g.write("{}\\t{}\\n".format(ncbi_id, ncbi_id_to_lineage[ncbi_id]))
+				if ncbi_id in ncbi_id_to_lineage:
+					lineage = ncbi_id_to_lineage[ncbi_id]
+				g.write("{}\\t{}\\n".format(ncbi_id, lineage))
 	"""
 }
