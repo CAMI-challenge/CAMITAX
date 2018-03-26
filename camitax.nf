@@ -65,7 +65,6 @@ process to_ncbi_taxonomy {
 
 	input:
 	file lineage from silva_lineage
-	file ncbi_taxonomy
 
 	output:
 	file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
