@@ -57,7 +57,7 @@ process annotate_rRNA {
 
 	seqs <- paste(readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/dada2/silva_nr_v132_train_set_bac_arc.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz"))
+	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/dada2/rdp_train_set_16.fa.gz"), "$baseDir/db/dada2/rdp_species_assignment_16.fa.gz"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }
