@@ -13,7 +13,9 @@ println """
 ░                                    ${camitax_version?:''}
 """
 
-genomes = Channel.fromPath("input/*.fasta").collect()
+params.i = 'input'
+params.x = 'fasta'
+genomes = Channel.fromPath("${params.i}/*.${params.x}").collect()
 genomes.subscribe { println "Input genomes: " + it }
 
 process extract_rRNA {
@@ -53,8 +55,9 @@ process annotate_rRNA {
 	library("Biostrings")
 	set.seed(42)
 
-	fastaFile <- readDNAStringSet("${fasta}")
-	tt <- addSpecies(assignTaxonomy(paste(fastaFile), "$baseDir/db/dada2/silva_nr_v132_train_set_bac_arc.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz")
+	seqs <- paste(readDNAStringSet("${fasta}"))
+	tt <- data.frame(if_dada2_fails = "NA;NA;NA;NA;NA;NA;NA")
+	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/dada2/silva_nr_v132_train_set_bac_arc.fa.gz"), "$baseDir/db/dada2/silva_species_assignment_v132.fa.gz"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }
