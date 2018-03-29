@@ -57,7 +57,7 @@ process annotate_rRNA {
 
 	seqs <- paste(readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/dada2/rdp_train_set_16.fa.gz"), "$baseDir/db/dada2/rdp_species_assignment_16.fa.gz"))
+	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/rdp_train_set_16.fa.gz"), "$baseDir/db/rdp_species_assignment_16.fa.gz"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }
@@ -80,7 +80,7 @@ process to_ncbi_taxonomy {
 	name_to_ncbi_id = {}
 	ncbi_id_to_lineage = {}
 
-	with gzip.open("$baseDir/db/taxonomy/rankedlineage.dmp.gz") as f:
+	with gzip.open("$baseDir/db/rankedlineage.dmp.gz") as f:
 		for line in f:
 			line = ''.join(line.decode('utf-8').rstrip().split('\t'))
 			(id, name, species, genus, family, order, class_, phylum, _, superkingdom, _) = line.split('|')
