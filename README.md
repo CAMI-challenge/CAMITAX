@@ -1,6 +1,7 @@
 # CAMITAX
 Taxon labels for microbial genomes
 
+
 ## Requirements
 
 - [Nextflow](https://www.nextflow.io/) 0.28
@@ -11,7 +12,10 @@ Taxon labels for microbial genomes
 - [Biostrings](https://www.bioconductor.org/packages/release/bioc/html/Biostrings.html) 2.46
 - [Python](https://www.python.org/) 3.6
 
-Most of these can be easily installed with [conda](https://conda.io/miniconda.html); I'll add more detailed instructions soon. Eventually, I plan to switch to a Docker or Singularity approach, resolving dependencies on the fly.
+Most of these can be easily installed with [conda](https://conda.io/miniconda.html); I'll add more detailed instructions soon.
+
+Eventually, I plan to switch to a Docker or Singularity approach, resolving dependencies on the fly. Stay tuned...
+
 
 ## Citation
 
