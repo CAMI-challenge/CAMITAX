@@ -2,15 +2,16 @@
 
 params.i = 'input'
 params.x = 'fasta'
-genomes = Channel.fromPath("${params.i}/*.${params.x}").collect()
-genomes.println { "Input genomes: " + it }
+genomes = Channel.fromPath("${params.i}/*.${params.x}")
 
 process run_prodigal {
+
+	container = 'quay.io/biocontainers/prodigal:2.6.3--0'
 
 	publishDir 'data'
 
 	input:
-	each genome from genomes
+	file genome from genomes
 
 	output:
 	file "${genome.baseName}.prodigal.faa"
