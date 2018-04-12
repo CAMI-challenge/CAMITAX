@@ -38,18 +38,25 @@ process extract_rRNA {
 	"""
 }
 
+train_set = Channel.fromPath( "$baseDir/db/rdp_train_set_16.fa.gz" ).collect()
+species_assignment = Channel.fromPath( "$baseDir/db/rdp_species_assignment_16.fa.gz" ).collect()
+
 process annotate_rRNA {
 
-	publishDir 'data'
+    container = 'quay.io/biocontainers/bioconductor-dada2:1.6.0--r3.4.1_0'
+
+	publishDir 'data', mode: 'copy'
 
 	input:
+    file train_set
+    file species_assignment
 	file fasta from rRNA_fasta
 
 	output:
 	file "${fasta.baseName}.dada2.txt" into silva_lineage
 
 	"""
-	#!/usr/bin/env RScript
+	#!/usr/bin/env Rscript
 
 	library(dada2)
 	library("Biostrings")
@@ -57,7 +64,7 @@ process annotate_rRNA {
 
 	seqs <- paste(readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-	try(tt <- addSpecies(assignTaxonomy(seqs, "$baseDir/db/rdp_train_set_16.fa.gz"), "$baseDir/db/rdp_species_assignment_16.fa.gz"))
+	try(tt <- addSpecies(assignTaxonomy(seqs, "${train_set}"), "${species_assignment}"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
 	"""
 }

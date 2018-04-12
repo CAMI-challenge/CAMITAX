@@ -8,7 +8,7 @@ process run_prodigal {
 
 	container = 'quay.io/biocontainers/prodigal:2.6.3--0'
 
-	publishDir 'data'
+	publishDir 'data', mode: 'copy'
 
 	input:
 	file genome from genomes
