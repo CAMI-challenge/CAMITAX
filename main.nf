@@ -54,6 +54,7 @@ process bedtools {
 }
 
 
+dada2_db = 'rdp'
 process dada2 {
     publishDir 'data', mode: 'copy'
 
@@ -64,6 +65,16 @@ process dada2 {
 	output:
 	file "${fasta.baseName}.dada2.txt" into silva_lineage
 
+    script:
+    if ( dada2_db == 'silva' ) {
+        dada2_train_set = "${db}/silva_nr_v132_train_set.fa.gz"
+        dada2_species_assignment = "${db}/silva_species_assignment_v132.fa.gz"
+    } else if ( dada2_db == 'rdp' ) {
+        dada2_train_set = "${db}/rdp_train_set_16.fa.gz"
+        dada2_species_assignment = "${db}/rdp_species_assignment_16.fa.gz"
+    } else
+        error "Invalid database for dada2 specified: ${dada2_db}"
+
 	"""
 	#!/usr/bin/env Rscript
 
@@ -72,7 +83,7 @@ process dada2 {
 
 	seqs <- paste(Biostrings::readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-	try(tt <- addSpecies(assignTaxonomy(seqs, "${db}/rdp_train_set_16.fa.gz"), "${db}/rdp_species_assignment_16.fa.gz"))
+	try(tt <- addSpecies(assignTaxonomy(seqs, "${dada2_train_set}"), "${dada2_species_assignment}"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=F, sep=";", row.names=F, col.names=F)
 	"""
 }
@@ -164,7 +175,10 @@ process centrifuge {
 	output:
     file "${genes.baseName}.centrifuge.txt"
 
+    script:
+    centrifuge_index = "${db}/p_compressed"
+
 	"""
-    centrifuge -f -x ${db}/p_compressed ${genes} > ${genes.baseName}.centrifuge.txt
+    centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
 	"""
 }
