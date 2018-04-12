@@ -38,8 +38,13 @@ process extract_rRNA {
 	"""
 }
 
-train_set = Channel.fromPath( "$baseDir/db/rdp_train_set_16.fa.gz" ).collect()
-species_assignment = Channel.fromPath( "$baseDir/db/rdp_species_assignment_16.fa.gz" ).collect()
+Channel
+    .fromPath( "$baseDir/db/rdp_train_set_16.fa.gz" ).last()
+    .set { train_set }
+
+Channel
+    .fromPath( "$baseDir/db/rdp_species_assignment_16.fa.gz" ).last()
+    .set { species_assignment }
 
 process annotate_rRNA {
 
@@ -59,13 +64,12 @@ process annotate_rRNA {
 	#!/usr/bin/env Rscript
 
 	library(dada2)
-	library("Biostrings")
 	set.seed(42)
 
-	seqs <- paste(readDNAStringSet("${fasta}"))
+	seqs <- paste(Biostrings::readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
 	try(tt <- addSpecies(assignTaxonomy(seqs, "${train_set}"), "${species_assignment}"))
-	write.table(tt, "${fasta.baseName}.dada2.txt", quote=FALSE, sep=";", row.names=F, col.names=F)
+	write.table(tt, "${fasta.baseName}.dada2.txt", quote=F, sep=";", row.names=F, col.names=F)
 	"""
 }
 

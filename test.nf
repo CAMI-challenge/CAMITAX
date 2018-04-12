@@ -14,7 +14,7 @@ process run_prodigal {
 	file genome from genomes
 
 	output:
-	file "${genome.baseName}.prodigal.faa"
+	file "${genome.baseName}.prodigal.faa" into prodiga_faa
     file "${genome.baseName}.prodigal.fna" into prodigal_fna
     file "${genome.baseName}.prodigal.gff"
 
