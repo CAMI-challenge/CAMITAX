@@ -15,46 +15,50 @@ println """
 
 params.i = 'input'
 params.x = 'fasta'
-genomes = Channel.fromPath("${params.i}/*.${params.x}").collect()
-genomes.subscribe { println "Input genomes: " + it }
 
-process extract_rRNA {
+Channel
+    .fromPath("${params.i}/*.${params.x}")
+    .into { input_genomes; barrnap_genomes; bedtools_genomes; prodigal_genomes }
 
-	publishDir 'data'
+input_genomes.collect().println { "Input genomes: " + it }
+db = Channel.fromPath( "$baseDir/db/", type: 'dir').first()
+
+process barrnap {
+    publishDir 'data', mode: 'copy'
+
+    input:
+    file genome from barrnap_genomes
+
+    output:
+    file "${genome.baseName}.barrnap.gff" into barrnap_gff
+
+    """
+	barrnap --threads 1 ${genome} > ${genome.baseName}.barrnap.gff
+	"""
+}
+
+
+process bedtools {
+    publishDir 'data', mode: 'copy'
 
 	input:
-	each genome from genomes
+	file genome from bedtools_genomes
+    file "${genome.baseName}.barrnap.gff" from barrnap_gff
 
 	output:
-//	file "${genome.baseName}.barrnap.gff"
-//	file "${genome.baseName}.prokka.*"
 	file "${genome.baseName}.16S_rRNA.fasta" into rRNA_fasta
 
-//	barrnap ${genome} > ${genome.baseName}.barrnap.gff
-//	prokka --noanno --cpus 1 --rnammer --outdir . --force --prefix ${genome.baseName}.prokka --locustag PROKKA ${genome}
 	"""
-	barrnap --threads 1 ${genome} > ${genome.baseName}.barrnap.gff
 	bedtools getfasta -fi ${genome} -bed <(grep "product=16S ribosomal RNA" ${genome.baseName}.barrnap.gff)  > ${genome.baseName}.16S_rRNA.fasta
 	"""
 }
 
-Channel
-    .fromPath( "$baseDir/db/rdp_train_set_16.fa.gz" ).last()
-    .set { train_set }
 
-Channel
-    .fromPath( "$baseDir/db/rdp_species_assignment_16.fa.gz" ).last()
-    .set { species_assignment }
-
-process annotate_rRNA {
-
-    container = 'quay.io/biocontainers/bioconductor-dada2:1.6.0--r3.4.1_0'
-
-	publishDir 'data', mode: 'copy'
+process dada2 {
+    publishDir 'data', mode: 'copy'
 
 	input:
-    file train_set
-    file species_assignment
+    file db
 	file fasta from rRNA_fasta
 
 	output:
@@ -68,14 +72,14 @@ process annotate_rRNA {
 
 	seqs <- paste(Biostrings::readDNAStringSet("${fasta}"))
 	tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-	try(tt <- addSpecies(assignTaxonomy(seqs, "${train_set}"), "${species_assignment}"))
+	try(tt <- addSpecies(assignTaxonomy(seqs, "${db}/rdp_train_set_16.fa.gz"), "${db}/rdp_species_assignment_16.fa.gz"))
 	write.table(tt, "${fasta.baseName}.dada2.txt", quote=F, sep=";", row.names=F, col.names=F)
 	"""
 }
 
-process to_ncbi_taxonomy {
 
-	publishDir 'data'
+process to_ncbi_taxonomy {
+    publishDir 'data', mode: 'copy'
 
 	input:
 	file lineage from silva_lineage
@@ -129,5 +133,38 @@ process to_ncbi_taxonomy {
 				if ncbi_id in ncbi_id_to_lineage:
 					lineage = ncbi_id_to_lineage[ncbi_id]
 				g.write("{}\\t{}\\n".format(ncbi_id, lineage))
+	"""
+}
+
+
+process prodigal {
+    publishDir 'data', mode: 'copy'
+
+	input:
+	file genome from prodigal_genomes
+
+	output:
+	file "${genome.baseName}.prodigal.faa" into prodiga_faa
+    file "${genome.baseName}.prodigal.fna" into prodigal_fna
+
+	"""
+    prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
+	"""
+}
+
+
+process centrifuge {
+	publishDir 'data', mode: 'copy'
+    maxForks 1
+
+	input:
+    file db
+	file genes from prodigal_fna
+
+	output:
+    file "${genes.baseName}.centrifuge.txt"
+
+	"""
+    centrifuge -f -x ${db}/p_compressed ${genes} > ${genes.baseName}.centrifuge.txt
 	"""
 }
