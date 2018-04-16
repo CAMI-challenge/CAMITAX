@@ -6,36 +6,36 @@ genomes = Channel.fromPath("${params.i}/*.${params.x}")
 
 process run_prodigal {
 
-	container = 'quay.io/biocontainers/prodigal:2.6.3--0'
+    container = 'quay.io/biocontainers/prodigal:2.6.3--0'
 
-	publishDir 'data', mode: 'copy'
+    publishDir 'data', mode: 'copy'
 
-	input:
-	file genome from genomes
+    input:
+    file genome from genomes
 
-	output:
-	file "${genome.baseName}.prodigal.faa" into prodiga_faa
+    output:
+    file "${genome.baseName}.prodigal.faa" into prodiga_faa
     file "${genome.baseName}.prodigal.fna" into prodigal_fna
     file "${genome.baseName}.prodigal.gff"
 
-	"""
+    """
     prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
-	"""
+    """
 }
 
 process run_centrifuge {
 
-	publishDir 'data'
+    publishDir 'data'
 
-	input:
-	file genes from prodigal_fna
+    input:
+    file genes from prodigal_fna
 
-	output:
+    output:
     file "${genes.baseName}.centrifuge.txt"
     file "${genes.baseName}.centrifuge.50"
 
-	"""
+    """
     ~/GitHub/centrifuge/centrifuge -f -x $baseDir/db/p_compressed ${genes} | ~/GitHub/centrifuge/centrifuge-kreport -x $baseDir/db/p_compressed > ${genes.baseName}.centrifuge.txt
     cat ${genes.baseName}.centrifuge.txt | awk '+\$1 >= 50.0' | tail -n1 > ${genes.baseName}.centrifuge.50
-	"""
+    """
 }

@@ -18,10 +18,16 @@ params.x = 'fasta'
 
 Channel
     .fromPath("${params.i}/*.${params.x}")
-    .into { input_genomes; barrnap_genomes; bedtools_genomes; prodigal_genomes }
+    .into {
+        input_genomes;
+        barrnap_genomes;
+        bedtools_genomes;
+        prodigal_genomes
+    }
 
 input_genomes.collect().println { "Input genomes: " + it }
 db = Channel.fromPath( "$baseDir/db/", type: 'dir').first()
+
 
 process barrnap {
     publishDir 'data', mode: 'copy'
