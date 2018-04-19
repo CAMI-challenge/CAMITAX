@@ -15,6 +15,7 @@ println """
 
 params.i = 'input'
 params.x = 'fasta'
+params.dada2_db = 'silva'
 
 Channel
     .fromPath("${params.i}/*.${params.x}")
@@ -22,7 +23,8 @@ Channel
         input_genomes;
         barrnap_genomes;
         bedtools_genomes;
-        prodigal_genomes
+        prodigal_genomes;
+        mash_genomes
     }
 
 input_genomes.collect().println { "Input genomes: " + it }
@@ -60,26 +62,26 @@ process bedtools {
 }
 
 
-dada2_db = 'rdp'
 process dada2 {
     publishDir 'data', mode: 'copy'
+    maxForks 1
 
     input:
     file db
     file fasta from rRNA_fasta
 
     output:
-    file "${fasta.baseName}.dada2.txt" into silva_lineage
+    file "${fasta.baseName}.dada2.txt" into dada2_lineage
 
     script:
-    if ( dada2_db == 'silva' ) {
+    if ( params.dada2_db == 'silva' ) {
         dada2_train_set = "${db}/silva_nr_v132_train_set.fa.gz"
         dada2_species_assignment = "${db}/silva_species_assignment_v132.fa.gz"
-    } else if ( dada2_db == 'rdp' ) {
+    } else if ( params.dada2_db == 'rdp' ) {
         dada2_train_set = "${db}/rdp_train_set_16.fa.gz"
         dada2_species_assignment = "${db}/rdp_species_assignment_16.fa.gz"
     } else
-        error "Invalid database for dada2 specified: ${dada2_db}"
+        error "Invalid database for dada2 specified: ${params.dada2_db}"
 
     """
     #!/usr/bin/env Rscript
@@ -97,22 +99,27 @@ process dada2 {
 
 process to_ncbi_taxonomy {
     publishDir 'data', mode: 'copy'
+    container = 'python'
 
     input:
-    file lineage from silva_lineage
+    file db
+    file lineage from dada2_lineage
 
     output:
     file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
 
+    script:
+    ncbi_taxonomy = "${db}/rankedlineage.dmp.gz"
+
     """
-    #!/usr/bin/env python3
+    #!/usr/bin/env python
 
     import gzip
 
     name_to_ncbi_id = {}
     ncbi_id_to_lineage = {}
 
-    with gzip.open("$baseDir/db/rankedlineage.dmp.gz") as f:
+    with gzip.open("${ncbi_taxonomy}") as f:
         for line in f:
             line = ''.join(line.decode('utf-8').rstrip().split('\t'))
             (id, name, species, genus, family, order, class_, phylum, _, superkingdom, _) = line.split('|')
@@ -170,21 +177,44 @@ process prodigal {
 }
 
 
-process centrifuge {
+// process centrifuge {
+//     publishDir 'data', mode: 'copy'
+//     maxForks 1
+//
+//     input:
+//     file db
+//     file genes from prodigal_fna
+//
+//     output:
+//     file "${genes.baseName}.centrifuge.txt"
+//
+//     script:
+//     centrifuge_index = "${db}/p_compressed"
+//
+//     """
+//     centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
+//     """
+// }
+
+
+process mash {
+
     publishDir 'data', mode: 'copy'
-    maxForks 1
 
     input:
     file db
-    file genes from prodigal_fna
+    file genome from mash_genomes
 
     output:
-    file "${genes.baseName}.centrifuge.txt"
+    file "${genome.baseName}.mash.ani"
+    file "${genome.baseName}.mash.tsv"
 
     script:
-    centrifuge_index = "${db}/p_compressed"
+    mash_index = "${db}/RefSeq_completeGenomes_20180410.msh"
 
     """
-    centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
+    mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
+    head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ani
+    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t' ${genome.baseName}.mash.sorted > ${genome.baseName}.mash.tsv
     """
 }
