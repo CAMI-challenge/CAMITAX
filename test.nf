@@ -2,26 +2,52 @@
 
 params.i = 'input'
 params.x = 'fasta'
-genomes = Channel.fromPath("${params.i}/*.${params.x}")
-db = Channel.fromPath( "$baseDir/db/", type: 'dir').first()
 
-params.mash_db = 'rdp'
-process mash {
+Channel
+    .fromPath("${params.i}/*.${params.x}")
+    .into {
+        input_genomes;
+        barrnap_genomes;
+        bedtools_genomes;
+        prodigal_genomes;
+        mash_genomes;
+        checkm_genomes
+    }
 
+input_genomes.collect().println { "Input genomes: " + it }
+db_folder = Channel.fromPath( "${baseDir}/db/", type: 'dir').first()
+
+process prodigal {
     publishDir 'data', mode: 'copy'
 
     input:
-    file db
-    file genome from genomes
+    file genome from prodigal_genomes
 
     output:
-    file "${genome.baseName}.mash_10p.tsv"
-
-    script:
-    mash_index = "${db}/RefSeq_completeGenomes_20180410.msh"
+    file "${genome.baseName}.prodigal.faa" into prodigal_faa
+    file "${genome.baseName}.prodigal.fna" into prodigal_fna
 
     """
-    mash dist ${mash_index} ${genome} | sort -gk3 | awk 'NR == 1 {t=\$3*1.1}; \$3 <= t' > ${genome.baseName}.mash_10p.tsv
+    prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
+    """
+}
+
+checkm_in = prodigal_faa.collect()
+process checkm {
+    publishDir 'data', mode: 'copy'
+    maxForks 1
+
+    input:
+    file db_folder
+    file checkm_in
+
+    output:
+    file "checkm.qa"
+
+    """
+    echo ${db_folder} | checkm data setRoot ${db_folder}
+    checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
+    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > checkm.qa
     """
 }
 
