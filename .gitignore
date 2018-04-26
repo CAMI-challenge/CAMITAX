@@ -1,1 +1,6 @@
-db/
+db/centrifuge/
+db/checkm/
+db/dada2/
+db/diamond/
+db/mash/
+db/taxonomy/
