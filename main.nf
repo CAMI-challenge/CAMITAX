@@ -75,11 +75,11 @@ process dada2 {
 
     script:
     if ( params.dada2_db == 'silva' ) {
-        dada2_train_set = "${db}/silva_nr_v132_train_set.fa.gz"
-        dada2_species_assignment = "${db}/silva_species_assignment_v132.fa.gz"
+        dada2_train_set = "${db}/dada2/silva_nr_v132_train_set.fa.gz"
+        dada2_species_assignment = "${db}/dada2/silva_species_assignment_v132.fa.gz"
     } else if ( params.dada2_db == 'rdp' ) {
-        dada2_train_set = "${db}/rdp_train_set_16.fa.gz"
-        dada2_species_assignment = "${db}/rdp_species_assignment_16.fa.gz"
+        dada2_train_set = "${db}/dada2/rdp_train_set_16.fa.gz"
+        dada2_species_assignment = "${db}/dada2/rdp_species_assignment_16.fa.gz"
     } else
         error "Invalid database for dada2 specified: ${params.dada2_db}"
 
@@ -109,7 +109,7 @@ process to_ncbi_taxonomy {
     file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
 
     script:
-    ncbi_taxonomy = "${db}/rankedlineage.dmp.gz"
+    ncbi_taxonomy = "${db}/taxonomy/rankedlineage.dmp.gz"
 
     """
     #!/usr/bin/env python
@@ -189,7 +189,7 @@ process prodigal {
 //     file "${genes.baseName}.centrifuge.txt"
 //
 //     script:
-//     centrifuge_index = "${db}/p_compressed"
+//     centrifuge_index = "${db}/centrifuge/p_compressed"
 //
 //     """
 //     centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
@@ -210,7 +210,7 @@ process mash {
     file "${genome.baseName}.mash.tsv"
 
     script:
-    mash_index = "${db}/RefSeq87.msh"
+    mash_index = "${db}/mash/RefSeq87.msh"
 
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
