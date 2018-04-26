@@ -15,7 +15,7 @@ println """
 
 params.i = 'input'
 params.x = 'fasta'
-params.dada2_db = 'silva'
+params.dada2_db = 'rdp'
 
 Channel
     .fromPath("${params.i}/*.${params.x}")
@@ -91,7 +91,7 @@ process dada2 {
 
     seqs <- paste(Biostrings::readDNAStringSet("${fasta}"))
     tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
-    try(tt <- addSpecies(assignTaxonomy(seqs, "${dada2_train_set}"), "${dada2_species_assignment}"))
+    try(tt <- addSpecies(assignTaxonomy(seqs, "${dada2_train_set}", minBoot=80), "${dada2_species_assignment}"))
     write.table(tt, "${fasta.baseName}.dada2.txt", quote=F, sep=";", row.names=F, col.names=F)
     """
 }
@@ -168,7 +168,7 @@ process prodigal {
     file genome from prodigal_genomes
 
     output:
-    file "${genome.baseName}.prodigal.faa" into prodiga_faa
+    file "${genome.baseName}.prodigal.faa" into prodigal_faa
     file "${genome.baseName}.prodigal.fna" into prodigal_fna
 
     """
@@ -210,7 +210,7 @@ process mash {
     file "${genome.baseName}.mash.tsv"
 
     script:
-    mash_index = "${db}/RefSeq_completeGenomes_20180410.msh"
+    mash_index = "${db}/RefSeq87.msh"
 
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
