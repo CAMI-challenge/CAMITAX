@@ -177,6 +177,29 @@ process prodigal {
 }
 
 
+process checkm {
+    publishDir 'data', mode: 'copy'
+    maxForks 1
+
+    input:
+    file db
+    file genome from checkm_genomes
+    file "${genome.baseName}.prodigal.faa" from prodigal_faa
+
+    output:
+    file "${genome.baseName}.checkm.tsv"
+
+    script:
+    checkm_db = "${db}/checkm/"
+
+    """
+    echo ${checkm_db} | checkm data setRoot ${checkm_db}
+    checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
+    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
+    """
+}
+
+
 // process centrifuge {
 //     publishDir 'data', mode: 'copy'
 //     maxForks 1

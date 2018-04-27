@@ -7,11 +7,8 @@ Channel
     .fromPath("${params.i}/*.${params.x}")
     .into {
         input_genomes;
-        barrnap_genomes;
-        bedtools_genomes;
         prodigal_genomes;
-        mash_genomes;
-        checkm_genomes
+        diamond_genomes
     }
 
 input_genomes.collect().println { "Input genomes: " + it }
@@ -32,27 +29,29 @@ process prodigal {
     """
 }
 
-process checkm {
+
+process diamond {
     publishDir 'data', mode: 'copy'
     maxForks 1
 
     input:
     file db
-    file genome from checkm_genomes
+    file genome from diamond_genomes
     file "${genome.baseName}.prodigal.faa" from prodigal_faa
 
     output:
-    file "${genome.baseName}.checkm.tsv"
+    file "${genome.baseName}.diamond.out"
 
     script:
-    checkm_db = "${db}/checkm/"
+    diamond_db = "${db}/diamond/swissprot_20180410.dmnd"
 
     """
-    echo ${checkm_db} | checkm data setRoot ${checkm_db}
-    checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
-    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
+    diamond blastp --sensitive --algo 1 -f 102 -p 1 -d ${diamond_db} -q ${genome.baseName}.prodigal.faa > ${genome.baseName}.diamond.out
     """
 }
+
+
+//
 
 // process run_centrifuge {
 //
