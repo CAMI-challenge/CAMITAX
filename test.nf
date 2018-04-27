@@ -15,7 +15,7 @@ Channel
     }
 
 input_genomes.collect().println { "Input genomes: " + it }
-db_folder = Channel.fromPath( "${baseDir}/db/", type: 'dir').first()
+db = Channel.fromPath( "${baseDir}/db/", type: 'dir').first()
 
 process prodigal {
     publishDir 'data', mode: 'copy'
@@ -32,22 +32,25 @@ process prodigal {
     """
 }
 
-checkm_in = prodigal_faa.collect()
 process checkm {
     publishDir 'data', mode: 'copy'
     maxForks 1
 
     input:
-    file db_folder
-    file checkm_in
+    file db
+    file genome from checkm_genomes
+    file "${genome.baseName}.prodigal.faa" from prodigal_faa
 
     output:
-    file "checkm.qa"
+    file "${genome.baseName}.checkm.tsv"
+
+    script:
+    checkm_db = "${db}/checkm/"
 
     """
-    echo ${db_folder} | checkm data setRoot ${db_folder}
+    echo ${checkm_db} | checkm data setRoot ${checkm_db}
     checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
-    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > checkm.qa
+    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
     """
 }
 
