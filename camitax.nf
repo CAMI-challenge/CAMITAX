@@ -221,7 +221,6 @@ process centrifuge {
 
 
 process mash {
-
     publishDir 'data', mode: 'copy'
 
     input:
