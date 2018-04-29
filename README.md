@@ -11,11 +11,11 @@ All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.do
 
 #### Plan B
 
-If Docker is no option, try [Sigularity](https://singularity.lbl.gov/) instead. Please consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/singularity.html) and then adjust the [CAMITAX configuration](nextflow.config) accordingly. In a nutshell, disable Docker and enable Singularity by replacing `docker.enabled = true` with `singularity.enabled = true`.
+If Docker is no option, try [Sigularity](https://singularity.lbl.gov/) instead. Please first consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/singularity.html) and then adjust the [CAMITAX configuration](nextflow.config) accordingly. In a nutshell, disable Docker and enable Singularity by replacing `docker.enabled = true` with `singularity.enabled = true`.
 
 #### Plan C
 
-As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to instead all software dependencies yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, good luck! Please [get in touch](https://github.com/abremges/CAMITAX/issues) if you need any help or further guidance.
+As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to instead all software dependencies by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, good luck! Please [get in touch](https://github.com/abremges/CAMITAX/issues) if you need any help or further guidance.
 
 ## User Guide
 
