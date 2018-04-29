@@ -1,23 +1,39 @@
-# CAMITAX
-Taxon labels for microbial genomes
+# CAMITAX: Taxon labels for microbial genomes
 
+![The CAMITAX taxonomic assignment workflow](camitax.png "The CAMITAX taxonomic assignment workflow")
+
+**The CAMITAX taxonomic assignment workflow.** CAMITAX assigns one NCBI Taxonomy ID (taxID) to each input genome *G* by combining phylogenetic placement with 16S rRNA gene-, gene homology-, and genome distance-based taxonomic assignments.
 
 ## Requirements
 
-- [Nextflow](https://www.nextflow.io/) 0.28
-- [barrnap](https://github.com/tseemann/barrnap) 0.8
-- [bedtools](https://github.com/arq5x/bedtools2) 2.27
-- [R](https://www.r-project.org/) 3.4
-- [dada2](https://www.bioconductor.org/packages/release/bioc/html/dada2.html) 1.6
-- [Biostrings](https://www.bioconductor.org/packages/release/bioc/html/Biostrings.html) 2.46
-- [Python](https://www.python.org/) 3.6
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/). If Docker is no option for you, please try [Sigularity](https://singularity.lbl.gov/) or manually install all dependencies (listed [here](nextflow.config) – easiest to install via [Bioconda](https://bioconda.github.io/))
 
-Most of these can be easily installed with [conda](https://conda.io/miniconda.html); I'll add more detailed instructions soon.
+## User Guide
 
-Eventually, I plan to switch to a Docker or Singularity approach, resolving dependencies on the fly. Stay tuned...
+### Installation
+
+```
+nextflow pull abremges/CAMITAX
+```
+That's all.
+
+### Input
+
+CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
+
+If the genomes are in a folder `input/` with file extension `.fasta`, please run:
+```
+nextflow run abremges/CAMITAX --i input --x fasta
+```
+
+### Output
+
+CAMITAX outputs a tab-seperated file containing the individual taxon assignments. **TODO**
 
 
 ## Citation
 
-Methods (re)implemented in CAMITAX were partly described in our CAMI manuscript. Please cite:
+A manuscript describing the full scope of CAMITAX is currently in preparation.
+
+In the meantime, please cite the GitHub repository and/or the CAMI manuscript:
 * Sczyrba, Hofmann, Belmann, et al. (2017). **Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software.** *Nature Methods*, 14, 11:1063–1071. doi:[10.1038/nmeth.4458](https://doi.org/10.1038/nmeth.4458)
