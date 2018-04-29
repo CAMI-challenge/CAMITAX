@@ -6,25 +6,22 @@
 - RDP trainset 16: https://doi.org/10.5281/zenodo.801827
 - Silva DB might need filtering? Then host our own.
 
-# NCBI Taxonomy database dump
-
-### Source: https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/
-
-- Accessed 2018-03-23
-- Host a snapshot of the taxonomy?
-
 #  Mash sketch database
 
-### Source: http://mash.readthedocs.io/en/latest/data.html
+- We'll provide a more recent sketch of RefSeq release 87, insert instructions here:
+  - In a nutshell: download RefSeq, rename FASTA files, sketch all.
 
-- (k=21, s=1000) for RefSeq release 70: https://gembox.cbcb.umd.edu/mash/RefSeqSketchesDefaults.msh.gz
-- Last updated: **2015**
-- We'll provide a more recent sketch of RefSeq release 87.
+# Kaiju index (also downloads NCBI taxonomy)
+
+- Simply execute Kaiju's ``makeDB.sh -p``, which will download
+  - the proGenomes database (``representatives.proteins.fasta.gz``), and
+  - the NCBI Taxonomy (``names.dmp``, ``nodes.dmp``, and ``merged.dmp``).
 
 # Centrifuge index
 
-### Source: http://www.ccb.jhu.edu/software/centrifuge/manual.shtml
-
-- p_compressed: ftp://ftp.ccb.jhu.edu/pub/infphilo/centrifuge/data/p_compressed_2018_4_15.tar.gz
-- Last updated:	2018-04-15
-- Link will be dead if they update the index again, thus we'll likely host our own.
+- Download the proGenomes database:
+  - ``wget http://progenomes.embl.de/data/repGenomes/representatives.genes.fasta.gz``
+- Replace taxon IDs found in ``merged.dmp`` by their updated IDs:
+  - ``gunzip -c representatives.genes.fasta.gz | perl -lsne 'BEGIN{open(F,$m);while(<F>){@F=split(/[\|\s]+/);$h{$F[0]}=$F[1]}}if(/>(\d+)\.(\S+)/){print ">",defined($h{$1})?$h{$1}:$1,".",$2;}else{print}' -- -m=merged.dmp > centrifuge_db.fna``
+- Create mapping file:
+  - ``perl -lne 'if(/>(\d+)\.(\S+)/){print $1,".",$2,"\t",$1}' < centrifuge_db.fna > centrifuge_db.conv``
