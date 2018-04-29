@@ -1,6 +1,6 @@
 # CAMITAX: Taxon labels for microbial genomes
 
-![The CAMITAX taxonomic assignment workflow](camitax.png "The CAMITAX taxonomic assignment workflow")
+![The CAMITAX taxonomic assignment workflow](workflow.png "The CAMITAX taxonomic assignment workflow")
 
 **The CAMITAX taxonomic assignment workflow.**
 CAMITAX assigns one NCBI Taxonomy ID (taxID) to each input genome *G* by combining phylogenetic placement with 16S rRNA gene-, gene homology-, and genome distance-based taxonomic assignments.
