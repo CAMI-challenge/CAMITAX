@@ -200,24 +200,24 @@ process checkm {
 }
 
 
-// process centrifuge {
-//     publishDir 'data', mode: 'copy'
-//     maxForks 1
-//
-//     input:
-//     file db
-//     file genes from prodigal_fna
-//
-//     output:
-//     file "${genes.baseName}.centrifuge.txt"
-//
-//     script:
-//     centrifuge_index = "${db}/centrifuge/p_compressed"
-//
-//     """
-//     centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
-//     """
-// }
+process centrifuge {
+    publishDir 'data', mode: 'copy'
+    maxForks 1
+
+    input:
+    file db
+    file genes from prodigal_fna
+
+    output:
+    file "${genes.baseName}.centrifuge.txt"
+
+    script:
+    centrifuge_index = "${db}/centrifuge/p_compressed"
+
+    """
+    centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
+    """
+}
 
 
 process mash {
