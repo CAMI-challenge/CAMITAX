@@ -23,5 +23,7 @@
   - ``wget http://progenomes.embl.de/data/repGenomes/representatives.genes.fasta.gz``
 - Replace taxon IDs found in ``merged.dmp`` by their updated IDs:
   - ``gunzip -c representatives.genes.fasta.gz | perl -lsne 'BEGIN{open(F,$m);while(<F>){@F=split(/[\|\s]+/);$h{$F[0]}=$F[1]}}if(/>(\d+)\.(\S+)/){print ">",defined($h{$1})?$h{$1}:$1,".",$2;}else{print}' -- -m=merged.dmp > centrifuge_db.fna``
-- Create mapping file:
+- Create mapping file (tab-separated file mapping sequence IDs to taxon IDs):
   - ``perl -lne 'if(/>(\d+)\.(\S+)/){print $1,".",$2,"\t",$1}' < centrifuge_db.fna > centrifuge_db.conv``
+- Build the index (creates ``proGenomes.[1-4].cf``)
+  - ``centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp --name-table names.dmp centrifuge_db.fna proGenomes``
