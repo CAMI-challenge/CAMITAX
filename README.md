@@ -6,7 +6,7 @@
 
 ## Requirements
 
-All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/). If Docker is no option for you, please try [Sigularity](https://singularity.lbl.gov/) or manually install all dependencies (listed [here](nextflow.config) – easiest to install via [Bioconda](https://bioconda.github.io/))
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/). If Docker is no option for you, please try [Sigularity](https://singularity.lbl.gov/) instead or manually install all dependencies (listed [here](nextflow.config) – easiest to install via [Bioconda](https://bioconda.github.io/)). 
 
 ## User Guide
 
