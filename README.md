@@ -8,7 +8,7 @@ CAMITAX assigns one NCBI Taxonomy ID (taxID) to each input genome *G* by combini
 ## Requirements
 
 All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/).
-If Docker is no option for you, please try [Sigularity](https://singularity.lbl.gov/) instead or manually install all dependencies (listed [here](nextflow.config) – easiest to install via [Bioconda](https://bioconda.github.io/)). 
+If Docker is no option for you, please try [Sigularity](https://singularity.lbl.gov/) instead or manually install all dependencies (listed [here](nextflow.config) – easiest to install via [Bioconda](https://bioconda.github.io/)). Either alternative might require changes to the [Nextflow configuration](nextflow.config), please [ask for help](https://github.com/abremges/CAMITAX/issues) if you're stuck.
 
 ## User Guide
 
