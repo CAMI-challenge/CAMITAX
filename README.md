@@ -47,4 +47,5 @@ CAMITAX outputs a tab-seperated file containing the individual taxon assignments
 ## Citation
 
 Please cite the CAMITAX GitHub repository and/or the CAMI manuscript:
+* Bremges (2018). **CAMITAX: Taxon labels for microbial genomes.** https://github.com/abremges/CAMITAX
 * Sczyrba, Hofmann, Belmann, et al. (2017). **Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software.** *Nature Methods*, 14, 11:1063–1071. doi:[10.1038/nmeth.4458](https://doi.org/10.1038/nmeth.4458)
