@@ -46,6 +46,5 @@ CAMITAX outputs a tab-seperated file containing the individual taxon assignments
 
 ## Citation
 
-A manuscript describing the full scope of CAMITAX is currently in preparation.
-In the meantime, please cite the GitHub repository and/or the CAMI manuscript:
+Please cite the CAMITAX GitHub repository and/or the CAMI manuscript:
 * Sczyrba, Hofmann, Belmann, et al. (2017). **Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software.** *Nature Methods*, 14, 11:1063–1071. doi:[10.1038/nmeth.4458](https://doi.org/10.1038/nmeth.4458)
