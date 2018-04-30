@@ -27,7 +27,7 @@ As a last resort, you may run CAMITAX without software containers. However, this
 nextflow pull abremges/CAMITAX
 ```
 
-**TODO** Download script for CAMITAX databases.
+**TODO** *Upload CAMITAX databases and provide download script.*
 
 ### Input
 
@@ -41,7 +41,7 @@ nextflow run abremges/CAMITAX --i input --x fasta
 
 CAMITAX outputs a tab-seperated file containing the individual taxon assignments.
 
-**TODO** Format and describe CAMITAX output.
+**TODO** *Format and describe CAMITAX output.*
 
 
 ## Citation
