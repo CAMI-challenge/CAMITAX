@@ -15,10 +15,8 @@ If Docker is no option, try [Sigularity](https://singularity.lbl.gov/) instead. 
 
 #### Plan C
 
-As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, the following (untested) code snippet should work:
-```
-while read requirement; do conda install --yes --channel "bioconda" $requirement; done < requirements.txt
-```
+As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, the following (untested) code snippet should work: ``conda install --yes --channel "bioconda" --file requirements.txt``
+
 If you need any help or further guidance: Please [get in touch](https://github.com/abremges/CAMITAX/issues)!
 
 ## User Guide
