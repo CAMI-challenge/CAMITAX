@@ -42,7 +42,7 @@ centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp
 # Download all bacterial and archaeal genomes from RefSeq
 rsync --exclude='*_from_genomic.*' --include='archaea/**/latest**/*_genomic.*' --include='bacteria/**/latest**/*_genomic.*' --include='*/' --exclude='*' --recursive --copy-links --prune-empty-dirs --times --verbose rsync://ftp.ncbi.nlm.nih.gov/genomes/refseq/ refseq
 # Use https://github.com/ondovb/refseqCollate to collate them
-collateGenomes.sh	refseq mash
+collateGenomes.sh refseq mash
 # Create the Mash index
 cd mash.genomes && mash sketch -p 16 -o RefSeq *.fasta && mv RefSeq.msh .. && cd ..
 ```
