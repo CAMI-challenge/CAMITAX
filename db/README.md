@@ -5,7 +5,8 @@
   - https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
 
 
-## DADA2 taxonomic reference data
+## DADA2 taxonomic reference data [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.801828.svg)](https://doi.org/10.5281/zenodo.801828)
+
 
 - **Source:** https://benjjneb.github.io/dada2/training.html
   - Silva version 132: https://doi.org/10.5281/zenodo.1172782
