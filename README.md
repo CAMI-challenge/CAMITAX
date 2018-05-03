@@ -24,8 +24,8 @@ As a last resort, you may run CAMITAX without software containers. However, this
 ### Installation
 
 ```
-nextflow clone abremges/CAMITAX
-cd CAMITAX/db && make
+nextflow pull abremges/CAMITAX
+nextflow run abremges/CAMITAX/init.nf
 ```
 
 **TODO:** [Upload CAMITAX databases and provide download script.](https://github.com/abremges/CAMITAX/issues/2)
