@@ -1,7 +1,9 @@
 #!/usr/bin/env nextflow
 
+params.db = 'db2'
+
 process cache_dada2_db {
-    storeDir "${baseDir}/db2/dada2/"
+    storeDir "${params.db}/dada2/"
     scratch = true
 
     output:
@@ -15,7 +17,7 @@ process cache_dada2_db {
 }
 
 process cache_checkm_db {
-    storeDir "${baseDir}/db2/checkm/"
+    storeDir "${params.db}/checkm/"
     scratch = true
 
     output:
