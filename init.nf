@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-params.db = 'db2'
+params.db = 'camitax/db'
 
 process cache_dada2_db {
     storeDir "${params.db}/dada2/"
@@ -9,10 +9,14 @@ process cache_dada2_db {
     output:
     file 'rdp_train_set_16.fa.gz'
     file 'rdp_species_assignment_16.fa.gz'
+    file 'silva_nr_v132_train_set.fa.gz'
+    file 'silva_species_assignment_v132.fa.gz'
 
     """
     wget https://zenodo.org/record/801828/files/rdp_train_set_16.fa.gz
     wget https://zenodo.org/record/801828/files/rdp_species_assignment_16.fa.gz
+    wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz
+    wget https://zenodo.org/record/1172783/files/silva_species_assignment_v132.fa.gz
     """
 }
 
