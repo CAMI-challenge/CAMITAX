@@ -47,5 +47,5 @@ rsync --exclude='*_from_genomic.*' --include='archaea/**/latest**/*_genomic.*' -
 collateGenomes.sh refseq mash
 
 # Create the Mash index
-cd mash.genomes && mash sketch -o RefSeq *.fasta
+cd mash.genomes && mash sketch -l <(find -name "*.fasta" | cut -c3-) -o RefSeq
 ```
