@@ -109,134 +109,90 @@ process to_ncbi_taxonomy {
     file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
 
     script:
-    ncbi_taxonomy = "${db}/taxonomy/rankedlineage.dmp.gz"
+    ncbi_names = "${db}/taxonomy/names.dmp"
 
     """
-    #!/usr/bin/env python
-
-    import gzip
-
-    name_to_ncbi_id = {}
-    ncbi_id_to_lineage = {}
-
-    with gzip.open("${ncbi_taxonomy}") as f:
-        for line in f:
-            line = ''.join(line.decode('utf-8').rstrip().split('\t'))
-            (id, name, species, genus, family, order, class_, phylum, _, superkingdom, _) = line.split('|')
-            if not superkingdom:
-                superkingdom = name
-            elif not phylum:
-                phylum = name
-            elif not class_:
-                class_ = name
-            elif not order:
-                order = name
-            elif not family:
-                family = name
-            elif not genus:
-                genus = name
-            elif not species:
-                species = name
-            name_to_ncbi_id[name] = id
-            ncbi_id_to_lineage[id] = "{};{};{};{};{};{};{}".format(superkingdom, phylum, class_, order, family, genus, species)
-
-    with open("${lineage}") as f:
-        with open("${lineage.baseName}.ncbi.txt", 'w') as g:
-            for line in f:
-                line = line.rstrip()
-                taxa = line.split(';')
-                ncbi_id = 1
-                lineage = ";;;;;;"
-                if ' '.join(taxa[-2:]) in name_to_ncbi_id:
-                    ncbi_id = name_to_ncbi_id[' '.join(taxa[-2:])]
-                else:
-                    for taxon in reversed(taxa[:-1]):
-                        if taxon in name_to_ncbi_id:
-                            ncbi_id = name_to_ncbi_id[taxon]
-                            break;
-                if ncbi_id in ncbi_id_to_lineage:
-                    lineage = ncbi_id_to_lineage[ncbi_id]
-                g.write("{}\\t{}\\n".format(ncbi_id, lineage))
+    to_ncbi_taxonomy.py ${lineage} ${ncbi_names} > ${lineage.baseName}.ncbi.txt
     """
 }
 
 
-process prodigal {
-    publishDir 'data', mode: 'copy'
-
-    input:
-    file genome from prodigal_genomes
-
-    output:
-    file "${genome.baseName}.prodigal.faa" into prodigal_faa
-    file "${genome.baseName}.prodigal.fna" into prodigal_fna
-
-    """
-    prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
-    """
-}
-
-
-process checkm {
-    publishDir 'data', mode: 'copy'
-    maxForks 1
-
-    input:
-    file db
-    file genome from checkm_genomes
-    file "${genome.baseName}.prodigal.faa" from prodigal_faa
-
-    output:
-    file "${genome.baseName}.checkm.tsv"
-
-    script:
-    checkm_db = "${db}/checkm/"
-
-    """
-    echo ${checkm_db} | checkm data setRoot ${checkm_db}
-    checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
-    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
-    """
-}
+// process prodigal {
+//     publishDir 'data', mode: 'copy'
+//
+//     input:
+//     file genome from prodigal_genomes
+//
+//     output:
+//     file "${genome.baseName}.prodigal.faa" into prodigal_faa
+//     file "${genome.baseName}.prodigal.fna" into prodigal_fna
+//
+//     """
+//     prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
+//     """
+// }
 
 
-process centrifuge {
-    publishDir 'data', mode: 'copy'
-    maxForks 1
+// process checkm {
+//     publishDir 'data', mode: 'copy'
+//     maxForks 1
+//
+//     input:
+//     file db
+//     file genome from checkm_genomes
+//     file "${genome.baseName}.prodigal.faa" from prodigal_faa
+//
+//     output:
+//     file "${genome.baseName}.checkm.tsv"
+//
+//     script:
+//     checkm_db = "${db}/checkm/"
+//
+//     """
+//     echo ${checkm_db} | checkm data setRoot ${checkm_db}
+//     checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
+//     checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
+//     """
+// }
 
-    input:
-    file db
-    file genes from prodigal_fna
 
-    output:
-    file "${genes.baseName}.centrifuge.txt"
+// process centrifuge {
+//     publishDir 'data', mode: 'copy'
+//     maxForks 1
+//
+//     input:
+//     file db
+//     file genes from prodigal_fna
+//
+//     output:
+//     file "${genes.baseName}.centrifuge.txt"
+//
+//     script:
+//     centrifuge_index = "${db}/centrifuge/p_compressed"
+//
+//     """
+//     centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
+//     """
+// }
 
-    script:
-    centrifuge_index = "${db}/centrifuge/p_compressed"
 
-    """
-    centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
-    """
-}
-
-
-process mash {
-    publishDir 'data', mode: 'copy'
-
-    input:
-    file db
-    file genome from mash_genomes
-
-    output:
-    file "${genome.baseName}.mash.ani"
-    file "${genome.baseName}.mash.tsv"
-
-    script:
-    mash_index = "${db}/mash/RefSeq87.msh"
-
-    """
-    mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
-    head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ani
-    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t' ${genome.baseName}.mash.sorted > ${genome.baseName}.mash.tsv
-    """
-}
+// process mash {
+//     publishDir 'data', mode: 'copy'
+//
+//     input:
+//     file db
+//     file genome from mash_genomes
+//
+//     output:
+//     file "${genome.baseName}.mash.ani"
+//     file "${genome.baseName}.mash.tsv"
+//
+//     script:
+//     mash_index = "${db}/mash/RefSeq.msh"
+//
+//     """
+//     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
+//     head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ani
+//     awk 'NR == 1 {t=\$3*1.1}; \$3 <= t' ${genome.baseName}.mash.sorted > ${genome.baseName}.mash.tsv
+//     """
+// }
