@@ -42,8 +42,16 @@ for ncbi_id in ncbi_id_counter:
         node_taxon = parent_id_map[node_taxon]
 iulca_counter = { k:v for k, v in lca_counter.items() if v >= 0.5*num_assignments }
 
+def getDepth(ncbi_id):
+    """Returns the depth of a taxon in the taxonomic tree"""
+    depth = 0
+    while ncbi_id != 0:
+        depth += 1
+        ncbi_id = parent_id_map[ncbi_id]
+    return depth
 
 def getLineage(ncbi_id):
+    """Returns the full lineage (as NCBI IDs) of a taxon"""
     lineage = []
     while ncbi_id != 0:
         lineage.insert(0, ncbi_id)
@@ -51,6 +59,7 @@ def getLineage(ncbi_id):
     return lineage
 
 def getLCA(taxon_list):
+    """Returns the lowest common ancestor (LCA) of all taxa in taxon_list"""
     lineage = getLineage(taxon_list.pop())
     for ncbi_id in taxon_list:
         while ncbi_id != 0:
@@ -61,17 +70,12 @@ def getLCA(taxon_list):
     return lineage.pop()
 
 def getLowest(taxon_list):
-    depth = 0
-    taxon = 0
+    """Returns the lowest taxon in taxon_list, LCA of co-optimal solutions"""
+    taxon, depth = 0, 0
     for ncbi_id in taxon_list:
-        d = 0
-        t = ncbi_id
-        while ncbi_id != 0:
-            d += 1
-            ncbi_id = parent_id_map[ncbi_id]
+        t, d = ncbi_id, getDepth(ncbi_id)
         if d > depth:
-            depth = d
-            taxon = t
+            taxon, depth = t, d
         elif d == depth:
             taxon = getLCA([taxon, t])
     return taxon
