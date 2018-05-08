@@ -32,14 +32,15 @@ with open(args.taxon) as f:
 rtl_counter = Counter()
 lca_counter = Counter()
 for ncbi_id in ncbi_id_counter:
-    id_taxon = ncbi_id
-    id_count = ncbi_id_counter[id_taxon]
-    while ncbi_id != 0:
-        if ncbi_id in ncbi_id_counter:
-            rtl_counter[id_taxon] += ncbi_id_counter[ncbi_id]
-        lca_counter[ncbi_id] += id_count
-        ncbi_id = parent_id_map[ncbi_id]
-iulca_counter = { k:v for k, v in rtl_counter.items() if v >= 0.5*num_assignments }
+    leaf_taxon = ncbi_id
+    leaf_count = ncbi_id_counter[ncbi_id]
+    node_taxon = leaf_taxon
+    while node_taxon != 0:
+        node_count = ncbi_id_counter[node_taxon]
+        rtl_counter[leaf_taxon] += node_count
+        lca_counter[node_taxon] += leaf_count
+        node_taxon = parent_id_map[node_taxon]
+iulca_counter = { k:v for k, v in lca_counter.items() if v >= 0.5*num_assignments }
 
 
 def getLineage(ncbi_id):
@@ -59,6 +60,21 @@ def getLCA(taxon_list):
             ncbi_id = parent_id_map[ncbi_id]
     return lineage.pop()
 
+def getLowest(taxon_list):
+    depth = 0
+    taxon = 0
+    for ncbi_id in taxon_list:
+        d = 0
+        t = ncbi_id
+        while ncbi_id != 0:
+            d += 1
+            ncbi_id = parent_id_map[ncbi_id]
+        if d > depth:
+            depth = d
+            taxon = t
+        elif d == depth:
+            taxon = getLCA([taxon, t])
+    return taxon
 
 lca_support = lca_counter[max(lca_counter, key=lca_counter.get)]
 lca_candidates = [ k for k, v in lca_counter.items() if v == lca_support ]
@@ -66,7 +82,7 @@ lca_winner = getLCA(list(ncbi_id_counter.keys()))
 
 iulca_support = iulca_counter[min(iulca_counter, key=iulca_counter.get)]
 iulca_candidates = [ k for k, v in iulca_counter.items() if v == iulca_support ]
-iulca_winner = getLCA(iulca_candidates.copy())
+iulca_winner = getLowest(iulca_candidates.copy())
 
 rtl_support = rtl_counter[max(rtl_counter, key=rtl_counter.get)]
 rtl_candidates = [ k for k, v in rtl_counter.items() if v == rtl_support ]
