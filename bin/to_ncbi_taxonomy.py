@@ -10,9 +10,10 @@ args = parser.parse_args()
 name_to_ncbi_id = {}
 with open(args.names) as f:
     for line in f:
-        (tax_id, name_txt, _, name_class, *_) = line.rstrip().replace('\t',' ').replace(' | ',' |').split(' |')
+        (ncbi_id, name, _, name_class, *_) = line.split('|')
+        ncbi_id, name, name_class = int(ncbi_id.strip()), name.strip(), name_class.strip()
         if name_class == "scientific name":
-            name_to_ncbi_id[name_txt] = tax_id
+            name_to_ncbi_id[name] = ncbi_id
 
 with open(args.lineage) as f:
     for line in f:
