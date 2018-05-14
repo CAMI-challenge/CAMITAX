@@ -21,18 +21,45 @@ Channel
     .fromPath("${params.i}/*.${params.x}")
     .into {
         input_genomes;
+        mash_genomes;
         barrnap_genomes;
         bedtools_genomes;
         prodigal_genomes;
-        mash_genomes
+        checkm_genomes;
     }
 
 input_genomes.collect().println { "Input genomes: " + it }
 db = Channel.fromPath( "$baseDir/db/", type: 'dir').first()
 
 
+process mash {
+    publishDir 'data', mode: 'copy'
+    cpus = 1
+    memory = '2 GB'
+
+    input:
+    file db
+    file genome from mash_genomes
+
+    output:
+    file "${genome.baseName}.mash.ANImax.txt"
+    file "${genome.baseName}.mash.taxIDs.txt" into mash_ids
+
+    script:
+    mash_index = "${db}/mash/RefSeq.msh"
+
+    """
+    mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
+    head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ANImax.txt
+    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t && \$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f2 -d',' > ${genome.baseName}.mash.taxIDs.txt
+    """
+}
+
+
 process barrnap {
     publishDir 'data', mode: 'copy'
+    cpus = 1
+    memory = '1 GB'
 
     input:
     file genome from barrnap_genomes
@@ -48,6 +75,8 @@ process barrnap {
 
 process bedtools {
     publishDir 'data', mode: 'copy'
+    cpus = 1
+    memory = '1 GB'
 
     input:
     file genome from bedtools_genomes
@@ -64,7 +93,8 @@ process bedtools {
 
 process dada2 {
     publishDir 'data', mode: 'copy'
-    maxForks 1
+    cpus = 1
+    memory = '16 GB'
 
     input:
     file db
@@ -99,6 +129,8 @@ process dada2 {
 
 process to_ncbi_taxonomy {
     publishDir 'data', mode: 'copy'
+    cpus = 1
+    memory = '1 GB'
     container = 'python'
 
     input:
@@ -106,93 +138,178 @@ process to_ncbi_taxonomy {
     file lineage from dada2_lineage
 
     output:
-    file "${lineage.baseName}.ncbi.txt" into ncbi_lineage
+    file "${lineage.baseName}.taxIDs.txt" into dada2_ids
 
     script:
     ncbi_names = "${db}/taxonomy/names.dmp"
 
     """
-    to_ncbi_taxonomy.py ${lineage} ${ncbi_names} > ${lineage.baseName}.ncbi.txt
+    to_ncbi_taxonomy.py ${lineage} ${ncbi_names} > ${lineage.baseName}.taxIDs.txt
     """
 }
 
 
-// process prodigal {
-//     publishDir 'data', mode: 'copy'
-//
-//     input:
-//     file genome from prodigal_genomes
-//
-//     output:
-//     file "${genome.baseName}.prodigal.faa" into prodigal_faa
-//     file "${genome.baseName}.prodigal.fna" into prodigal_fna
-//
-//     """
-//     prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
-//     """
-// }
+process prodigal {
+    publishDir 'data', mode: 'copy'
+    cpus = 1
+    memory = '1 GB'
+
+    input:
+    file genome from prodigal_genomes
+
+    output:
+    file "${genome.baseName}.prodigal.faa" into faa_kaiju
+    file "${genome.baseName}.prodigal.fna" into fna_centrifuge
+
+    """
+    prodigal -a ${genome.baseName}.prodigal.faa -d ${genome.baseName}.prodigal.fna -f gff -i ${genome} -o ${genome.baseName}.prodigal.gff
+    """
+}
 
 
-// process checkm {
-//     publishDir 'data', mode: 'copy'
-//     maxForks 1
-//
-//     input:
-//     file db
-//     file genome from checkm_genomes
-//     file "${genome.baseName}.prodigal.faa" from prodigal_faa
-//
-//     output:
-//     file "${genome.baseName}.checkm.tsv"
-//
-//     script:
-//     checkm_db = "${db}/checkm/"
-//
-//     """
-//     echo ${checkm_db} | checkm data setRoot ${checkm_db}
-//     checkm lineage_wf --reduced_tree --genes -x faa . checkm_out
-//     checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
-//     """
-// }
+process centrifuge {
+    publishDir 'data', mode: 'copy'
+    cpus = 4
+    memory '16 GB'
+
+    input:
+    file db
+    file genes from fna_centrifuge
+
+    output:
+    file "${genes.baseName}.centrifuge.taxIDs.txt" into centrifuge_ids
+
+    script:
+    centrifuge_index = "${db}/centrifuge/proGenomes"
+
+    """
+    centrifuge -p ${task.cpus} -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.out
+    awk '\$4+1 > 250' ${genes.baseName}.centrifuge.out | cut -f3 > ${genes.baseName}.centrifuge.taxIDs.txt
+    """
+}
 
 
-// process centrifuge {
-//     publishDir 'data', mode: 'copy'
-//     maxForks 1
-//
-//     input:
-//     file db
-//     file genes from prodigal_fna
-//
-//     output:
-//     file "${genes.baseName}.centrifuge.txt"
-//
-//     script:
-//     centrifuge_index = "${db}/centrifuge/p_compressed"
-//
-//     """
-//     centrifuge -f -x ${centrifuge_index} ${genes} > ${genes.baseName}.centrifuge.txt
-//     """
-// }
+process kaiju {
+    publishDir 'data', mode: 'copy'
+    cpus = 4
+    memory '16 GB'
+
+    input:
+    file db
+    file genes from faa_kaiju
+
+    output:
+    file "${genes.baseName}.kaiju.taxIDs.txt" into kaiju_ids
+
+    script:
+    kaiju_index = "${db}/kaiju/proGenomes.fmi"
+    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+
+    """
+    kaiju -p -z ${task.cpus} -t ${ncbi_nodes} -f ${kaiju_index} -i ${genes} > ${genes.baseName}.kaiju.out
+    grep "^C" ${genes.baseName}.kaiju.out | cut -f3 > ${genes.baseName}.kaiju.taxIDs.txt
+    """
+}
 
 
-// process mash {
-//     publishDir 'data', mode: 'copy'
-//
-//     input:
-//     file db
-//     file genome from mash_genomes
-//
-//     output:
-//     file "${genome.baseName}.mash.ani"
-//     file "${genome.baseName}.mash.tsv"
-//
-//     script:
-//     mash_index = "${db}/mash/RefSeq.msh"
-//
-//     """
-//     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
-//     head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ani
-//     awk 'NR == 1 {t=\$3*1.1}; \$3 <= t' ${genome.baseName}.mash.sorted > ${genome.baseName}.mash.tsv
-//     """
-// }
+process checkm {
+    publishDir 'data', mode: 'copy'
+    cpus = 4
+    memory '16 GB'
+
+    input:
+    file db
+    file genome from checkm_genomes
+
+    output:
+    file "${genome.baseName}.checkm.tsv"
+
+    script:
+    checkm_db = "${db}/checkm/"
+
+    """
+    echo ${checkm_db} | checkm data setRoot ${checkm_db}
+    checkm lineage_wf -t ${task.cpus} --reduced_tree -x ${params.x} . checkm_out
+    checkm qa -o 2 --tab_table checkm_out/lineage.ms checkm_out > ${genome.baseName}.checkm.tsv
+    """
+}
+
+
+process mash_summary {
+    publishDir 'data', mode: 'copy'
+    container = 'python'
+
+    input:
+    file db
+    file taxon_list from mash_ids
+
+    output:
+    file "${taxon_list.baseName}.summary"
+
+    script:
+    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+
+    """
+    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
+    """
+}
+
+
+process dada2_summary {
+    publishDir 'data', mode: 'copy'
+    container = 'python'
+
+    input:
+    file db
+    file taxon_list from dada2_ids
+
+    output:
+    file "${taxon_list.baseName}.summary"
+
+    script:
+    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+
+    """
+    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
+    """
+}
+
+
+process kaiju_summary {
+    publishDir 'data', mode: 'copy'
+    container = 'python'
+
+    input:
+    file db
+    file taxon_list from kaiju_ids
+
+    output:
+    file "${taxon_list.baseName}.summary"
+
+    script:
+    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+
+    """
+    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
+    """
+}
+
+
+process centrifuge_summary {
+    publishDir 'data', mode: 'copy'
+    container = 'python'
+
+    input:
+    file db
+    file taxon_list from centrifuge_ids
+
+    output:
+    file "${taxon_list.baseName}.summary"
+
+    script:
+    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+
+    """
+    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
+    """
+}

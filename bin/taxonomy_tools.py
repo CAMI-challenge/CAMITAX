@@ -28,6 +28,10 @@ with open(args.taxon) as f:
         ncbi_id = int(line.rstrip())
         ncbi_id_counter[ncbi_id] += 1
 
+# Catch empty input file (assign to root)
+if not ncbi_id_counter:
+    ncbi_id_counter[1] += 1
+
 
 rtl_counter = Counter()
 lca_counter = Counter()
@@ -41,6 +45,7 @@ for ncbi_id in ncbi_id_counter:
         lca_counter[node_taxon] += leaf_count
         node_taxon = parent_id_map[node_taxon]
 iulca_counter = { k:v for k, v in lca_counter.items() if v >= 0.5*num_assignments }
+
 
 def getDepth(ncbi_id):
     """Returns the depth of a taxon in the taxonomic tree"""
@@ -80,6 +85,7 @@ def getLowest(taxon_list):
             taxon = getLCA([taxon, t])
     return taxon
 
+
 lca_support = lca_counter[max(lca_counter, key=lca_counter.get)]
 lca_candidates = [ k for k, v in lca_counter.items() if v == lca_support ]
 lca_winner = getLCA(list(ncbi_id_counter.keys()))
@@ -91,6 +97,7 @@ iulca_winner = getLowest(iulca_candidates.copy())
 rtl_support = rtl_counter[max(rtl_counter, key=rtl_counter.get)]
 rtl_candidates = [ k for k, v in rtl_counter.items() if v == rtl_support ]
 rtl_winner = getLCA(rtl_candidates.copy())
+
 
 print("#\tTaxon\tSupport\tCandidates")
 print("LCA\t{}\t{}\t{}".format(lca_winner, lca_support, lca_candidates))
