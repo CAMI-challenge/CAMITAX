@@ -26,6 +26,7 @@ Channel
         bedtools_genomes;
         prodigal_genomes;
         checkm_genomes;
+        summary_genomes
     }
 
 input_genomes.collect().println { "Input genomes: " + it }
@@ -235,81 +236,39 @@ process checkm {
 }
 
 
-process mash_summary {
+process summarize {
     publishDir 'data', mode: 'copy'
     container = 'python'
 
     input:
     file db
-    file taxon_list from mash_ids
+    file genome from summary_genomes
+    file "${genome.baseName}.mash.taxIDs.txt" from mash_ids
+    file "${genome.baseName}.16S_rRNA.dada2.taxIDs.txt" from dada2_ids
+    file "${genome.baseName}.prodigal.centrifuge.taxIDs.txt" from centrifuge_ids
+    file "${genome.baseName}.prodigal.kaiju.taxIDs.txt" from kaiju_ids
 
     output:
-    file "${taxon_list.baseName}.summary"
+    file "${genome.baseName}.mash.taxIDs.summary"
+    file "${genome.baseName}.dada2.taxIDs.summary"
+    file "${genome.baseName}.centrifuge.taxIDs.summary"
+    file "${genome.baseName}.kaiju.taxIDs.summary"
+    file "${genome.baseName}.taxIDs.summary"
 
     script:
     ncbi_nodes = "${db}/taxonomy/nodes.dmp"
 
     """
-    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
-    """
-}
+    taxonomy_tools.py ${genome.baseName}.mash.taxIDs.txt ${ncbi_nodes} > ${genome.baseName}.mash.taxIDs.summary
+    taxonomy_tools.py ${genome.baseName}.16S_rRNA.dada2.taxIDs.txt ${ncbi_nodes} > ${genome.baseName}.dada2.taxIDs.summary
+    taxonomy_tools.py ${genome.baseName}.prodigal.centrifuge.taxIDs.txt ${ncbi_nodes} > ${genome.baseName}.centrifuge.taxIDs.summary
+    taxonomy_tools.py ${genome.baseName}.prodigal.kaiju.taxIDs.txt ${ncbi_nodes} > ${genome.baseName}.kaiju.taxIDs.summary
 
+    grep -w "^LCA" ${genome.baseName}.mash.taxIDs.summary | cut -f2 >> ${genome.baseName}.taxIDs.txt
+    grep -w "^iuLCA" ${genome.baseName}.dada2.taxIDs.summary | cut -f2 >> ${genome.baseName}.taxIDs.txt
+    grep -w "^iuLCA" ${genome.baseName}.centrifuge.taxIDs.summary | cut -f2 >> ${genome.baseName}.taxIDs.txt
+    grep -w "^iuLCA" ${genome.baseName}.kaiju.taxIDs.summary | cut -f2 >> ${genome.baseName}.taxIDs.txt
 
-process dada2_summary {
-    publishDir 'data', mode: 'copy'
-    container = 'python'
-
-    input:
-    file db
-    file taxon_list from dada2_ids
-
-    output:
-    file "${taxon_list.baseName}.summary"
-
-    script:
-    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
-
-    """
-    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
-    """
-}
-
-
-process kaiju_summary {
-    publishDir 'data', mode: 'copy'
-    container = 'python'
-
-    input:
-    file db
-    file taxon_list from kaiju_ids
-
-    output:
-    file "${taxon_list.baseName}.summary"
-
-    script:
-    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
-
-    """
-    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
-    """
-}
-
-
-process centrifuge_summary {
-    publishDir 'data', mode: 'copy'
-    container = 'python'
-
-    input:
-    file db
-    file taxon_list from centrifuge_ids
-
-    output:
-    file "${taxon_list.baseName}.summary"
-
-    script:
-    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
-
-    """
-    taxonomy_tools.py ${taxon_list} ${ncbi_nodes} > ${taxon_list.baseName}.summary
+    taxonomy_tools.py ${genome.baseName}.taxIDs.txt ${ncbi_nodes} > ${genome.baseName}.taxIDs.summary
     """
 }
