@@ -1,8 +1,5 @@
-barrnap=0.8
-bedtools=2.27.1
 centrifuge=1.0.3
 checkm-genome=1.0.11
-diamond=0.9.21
 bioconductor-dada2=1.6.0
 kaiju=1.6.2
 mash=2.0
