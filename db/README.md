@@ -1,16 +1,35 @@
-## CheckM database
+##  Mash sketch database
 
-- **Source:** https://ecogenomics.github.io/CheckM/
-  - https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
-  - https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+```
+# Follow the Genomes Download FAQ (minus the 'complete' part): https://www.ncbi.nlm.nih.gov/genome/doc/ftpfaq/#allcomplete
+wget -O assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/archaea/assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/assembly_summary.txt
+awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
+awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
+xargs -n 1 -P 32 wget -q < ftpfilepaths
 
+# Double-check that all genomes were downloaded, please download missing file(s) – if any:
+diff <(sed 's/.*\///' < ftpfilepaths | sort) <(ls -1 | grep "genomic.fna.gz" | sort)
+
+# Prefix the filename with the NCBI Taxonomy ID (field 6 in assembly_summary.txt):
+mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | while read i; do cp $(echo $i | cut -d' ' -f2)\_genomic.fna.gz mash_genomes/$(echo $i | tr ' ' '_'); done
+
+# Create the Mash index
+cd mash_genomes && mash sketch -p 32 -o RefSeq *
+```
 
 ## DADA2 taxonomic reference data
 
-- **Source:** https://benjjneb.github.io/dada2/training.html
-  - Silva version 132: https://doi.org/10.5281/zenodo.1172782
-  - RDP trainset 16: https://doi.org/10.5281/zenodo.801827
+```
+# Source: https://benjjneb.github.io/dada2/training.html
 
+# Download RDP trainset 16: https://doi.org/10.5281/zenodo.801827
+wget https://zenodo.org/record/801828/files/rdp_train_set_16.fa.gz
+wget https://zenodo.org/record/801828/files/rdp_species_assignment_16.fa.gz
+
+# Download SILVA version 132: https://doi.org/10.5281/zenodo.1172782
+wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz
+wget https://zenodo.org/record/1172783/files/silva_species_assignment_v132.fa.gz
+```
 
 ## Kaiju index (and NCBI taxonomy)
 
@@ -35,22 +54,12 @@ perl -lne 'if(/>(\d+)\.(\S+)/){print $1,".",$2,"\t",$1}' < centrifuge_db.fna > c
 centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp --name-table names.dmp centrifuge_db.fna proGenomes
 ```
 
-
-##  Mash sketch database
+## CheckM database
 
 ```
-# Follow the Genomes Download FAQ (minus the 'complete' part): https://www.ncbi.nlm.nih.gov/genome/doc/ftpfaq/#allcomplete
-wget -O assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/archaea/assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/assembly_summary.txt
-awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
-awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
-xargs -n 1 -P 32 wget -q < ftpfilepaths
+# Source: https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
 
-# Double-check that all genomes were downloaded, please download missing file(s) – if any:
-diff <(sed 's/.*\///' < ftpfilepaths | sort) <(ls -1 | grep "genomic.fna.gz" | sort)
-
-# Prefix the filename with the NCBI Taxonomy ID (field 6 in assembly_summary.txt):
-mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | while read i; do cp $(echo $i | cut -d' ' -f2)\_genomic.fna.gz mash_genomes/$(echo $i | tr ' ' '_'); done
-
-# Create the Mash index
-cd mash_genomes && mash sketch -p 32 -o RefSeq *
+# Download and unpack CheckM database
+wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+tar xfv checkm_data_2015_01_16.tar.gz
 ```
