@@ -7,7 +7,7 @@ awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
 awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
 xargs -n 1 -P 32 wget -q < ftpfilepaths
 
-# Double-check that all genomes were downloaded, please download missing file(s) – if any:
+# Double-check that all genomes were downloaded, please manually download missing file(s) – if any:
 diff <(sed 's/.*\///' < ftpfilepaths | sort) <(ls -1 | grep "genomic.fna.gz" | sort)
 
 # Prefix the filename with the NCBI Taxonomy ID (field 6 in assembly_summary.txt):
