@@ -20,8 +20,6 @@ cd mash_genomes && mash sketch -p 32 -o RefSeq *
 ## DADA2 reference databases
 
 ```
-# Source: https://benjjneb.github.io/dada2/training.html
-
 # Download RDP trainset 16: https://doi.org/10.5281/zenodo.801827
 wget https://zenodo.org/record/801828/files/rdp_train_set_16.fa.gz
 wget https://zenodo.org/record/801828/files/rdp_species_assignment_16.fa.gz
@@ -29,6 +27,8 @@ wget https://zenodo.org/record/801828/files/rdp_species_assignment_16.fa.gz
 # Download SILVA version 132: https://doi.org/10.5281/zenodo.1172782
 wget https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz
 wget https://zenodo.org/record/1172783/files/silva_species_assignment_v132.fa.gz
+
+# Source: https://benjjneb.github.io/dada2/training.html
 ```
 
 ## Kaiju index (and NCBI taxonomy)
@@ -57,9 +57,9 @@ centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp
 ## CheckM database
 
 ```
-# Source: https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
-
 # Download and unpack CheckM database
 wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
 tar xfv checkm_data_2015_01_16.tar.gz
+
+# Source: https://github.com/Ecogenomics/CheckM/wiki/Installation#how-to-install-checkm
 ```
