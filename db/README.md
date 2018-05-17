@@ -45,6 +45,9 @@ awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
 awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
 xargs -n 1 -P 32 wget -q < ftpfilepaths
 
+# Double-check that all files were downloaded and download missing file(s) – if any:
+diff <(sed 's/.*\///' < ftpfilepaths | sort) <(ls -1 | grep "genomic.fna.gz" | sort)
+
 # Prefix the filename with the NCBI Taxonomy ID (field 6 in assembly_summary.txt):
 mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | while read i; do cp $(echo $i | cut -d' ' -f2)\_genomic.fna.gz mash_genomes/$(echo $i | tr ' ' '_'); done
 
