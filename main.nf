@@ -63,7 +63,7 @@ process mash {
 
 
 /********
- * (A) 16S rRNA gene-based assignment, and
+ * (B) 16S rRNA gene-based assignment, and
  * (D) Phylogenetic placement
  */
 process checkm {
