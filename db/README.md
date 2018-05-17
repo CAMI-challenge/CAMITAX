@@ -17,7 +17,7 @@ mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | whil
 cd mash_genomes && mash sketch -p 32 -o RefSeq *
 ```
 
-## DADA2 taxonomic reference data
+## DADA2 reference databases
 
 ```
 # Source: https://benjjneb.github.io/dada2/training.html
