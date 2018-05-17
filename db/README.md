@@ -5,8 +5,7 @@
   - https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
 
 
-## DADA2 taxonomic reference data [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.801828.svg)](https://doi.org/10.5281/zenodo.801828)
-
+## DADA2 taxonomic reference data
 
 - **Source:** https://benjjneb.github.io/dada2/training.html
   - Silva version 132: https://doi.org/10.5281/zenodo.1172782
@@ -40,12 +39,14 @@ centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp
 ##  Mash sketch database
 
 ```
-# Download (or update) all bacterial and archaeal genome sequences from RefSeq
-rsync --exclude='*_from_genomic.*' --include='archaea/**/latest**/*_genomic.*' --include='bacteria/**/latest**/*_genomic.*' --include='*/' --exclude='*' --recursive --copy-links --prune-empty-dirs --times --verbose --delete-after rsync://ftp.ncbi.nlm.nih.gov/genomes/refseq/ refseq
+# Follow the Genomes Download FAQ (minus the 'complete' part): https://www.ncbi.nlm.nih.gov/genome/doc/ftpfaq/#allcomplete
+wget -O assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/archaea/assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/assembly_summary.txt
+awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
+awk 'BEGIN{FS=OFS="/";filesuffix="genomic.gbff.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
+xargs -n 1 -P 32 wget -q < ftpfilepaths
 
-# Use https://github.com/ondovb/refseqCollate to collate them
-collateGenomes.sh refseq mash
+# TODO Rename files accordingly!
 
-# Create the Mash index
-cd mash.genomes && mash sketch -l <(find -name "*.fasta" | cut -c3-) -o RefSeq
+# 'TODO Adjust find command - Create the Mash index
+mash sketch -l <(find -name "*.fna" | cut -c3-) -o RefSeq
 ```
