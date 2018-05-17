@@ -42,7 +42,7 @@ centrifuge-build --conversion-table centrifuge_db.conv --taxonomy-tree nodes.dmp
 # Follow the Genomes Download FAQ (minus the 'complete' part): https://www.ncbi.nlm.nih.gov/genome/doc/ftpfaq/#allcomplete
 wget -O assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/archaea/assembly_summary.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/assembly_summary.txt
 awk -F "\t" '$11=="latest"{print $20}' assembly_summary.txt > ftpdirpaths
-awk 'BEGIN{FS=OFS="/";filesuffix="genomic.gbff.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
+awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print ftpdir,file}' ftpdirpaths > ftpfilepaths
 xargs -n 1 -P 32 wget -q < ftpfilepaths
 
 # TODO Rename files accordingly!
