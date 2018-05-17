@@ -166,7 +166,7 @@ process centrifuge {
 
     publishDir "data/${id}"
     cpus = 4
-    memory '16 GB'
+    memory '24 GB'
 
     input:
     file db
