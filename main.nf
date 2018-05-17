@@ -173,7 +173,7 @@ process centrifuge {
     set val(id), file(genes) from fna_centrifuge
 
     output:
-    set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_ids
+    set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_taxIDs
 
     script:
     centrifuge_index = "${db}/centrifuge/proGenomes"
@@ -196,7 +196,7 @@ process kaiju {
     set val(id), file(genes) from faa_kaiju
 
     output:
-    set id, "${id}.kaiju.taxIDs.txt" into kaiju_ids
+    set id, "${id}.kaiju.taxIDs.txt" into kaiju_taxIDs
 
     script:
     kaiju_index = "${db}/kaiju/proGenomes.fmi"
