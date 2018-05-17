@@ -43,8 +43,6 @@ process mash {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 1
-    memory = '2 GB'
 
     input:
     file db
@@ -72,7 +70,7 @@ process checkm {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 4
+    cpus = 8
     memory '16 GB'
 
     input:
@@ -105,7 +103,7 @@ process dada2 {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 1
+    cpus = 8
     memory = '16 GB'
 
     input:
@@ -146,8 +144,6 @@ process prodigal {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 1
-    memory = '1 GB'
 
     input:
     set val(id), file(genome) from prodigal_genomes
@@ -165,7 +161,7 @@ process centrifuge {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 4
+    cpus = 16
     memory '24 GB'
 
     input:
@@ -188,7 +184,7 @@ process kaiju {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 4
+    cpus = 16
     memory '16 GB'
 
     input:
@@ -222,8 +218,6 @@ process summarize {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 1
-    memory = '1 GB'
     container = 'python'
 
     input:
