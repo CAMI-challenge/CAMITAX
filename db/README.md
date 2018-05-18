@@ -14,7 +14,7 @@ diff <(sed 's/.*\///' < ftpfilepaths | sort) <(ls -1 | grep "genomic.fna.gz" | s
 mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | while read i; do cp $(echo $i | cut -d' ' -f2)\_genomic.fna.gz mash_genomes/$(echo $i | tr ' ' '_'); done
 
 # Create the Mash index
-cd mash_genomes && mash sketch -p 32 -o RefSeq *
+cd mash_genomes && mash sketch -p 32 -o ../RefSeq * && cd ..
 ```
 
 ## DADA2 reference databases
