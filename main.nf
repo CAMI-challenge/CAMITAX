@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.2.0'
+camitax_version = 'v0.3.0'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -15,7 +15,7 @@ println """
 
 params.i = 'input'
 params.x = 'fasta'
-params.db = "$baseDir/db/"
+params.db = "camitax/db"
 params.dada2_db = 'rdp'
 
 Channel
@@ -52,7 +52,7 @@ process mash {
     set id, "${id}.mash.ANImax.txt", "${id}.mash.taxIDs.txt" into mash_ANImax_taxIDs
 
     script:
-    mash_index = "${db}/mash/RefSeq.msh"
+    mash_index = "${db}/mash/RefSeq_20180510.msh"
 
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
@@ -172,7 +172,7 @@ process centrifuge {
     set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_taxIDs
 
     script:
-    centrifuge_index = "${db}/centrifuge/proGenomes"
+    centrifuge_index = "${db}/centrifuge/proGenomes_20180510"
 
     """
     centrifuge -p ${task.cpus} -f -x ${centrifuge_index} ${genes} > ${id}.centrifuge.out
@@ -195,8 +195,8 @@ process kaiju {
     set id, "${id}.kaiju.taxIDs.txt" into kaiju_taxIDs
 
     script:
-    kaiju_index = "${db}/kaiju/proGenomes.fmi"
-    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+    kaiju_index = "${db}/kaiju/proGenomes_20180510.fmi"
+    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
 
     """
     kaiju -p -z ${task.cpus} -t ${ncbi_nodes} -f ${kaiju_index} -i ${genes} > ${id}.kaiju.out
@@ -225,40 +225,20 @@ process summarize {
     set val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage) from id_collection
 
     output:
-    file "${id}.mash.taxIDs.summary"
-    file "${id}.dada2.taxIDs.txt"
-    file "${id}.dada2.taxIDs.summary"
-    file "${id}.centrifuge.taxIDs.summary"
-    file "${id}.kaiju.taxIDs.summary"
-    file "${id}.checkm.taxIDs.txt"
-    file "${id}.checkm.taxIDs.summary"
-    file "${id}.taxIDs.summary"
+    file "${id}.summary"
 
     script:
-    ncbi_names = "${db}/taxonomy/names.dmp"
-    ncbi_nodes = "${db}/taxonomy/nodes.dmp"
+    ncbi_names = "${db}/taxonomy/names_20180510.dmp"
+    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
 
     """
-    # Convert CheckM and Dada2 lineages to NCBI Taxonomy IDs
-    tail -n +2 ${checkm_lineage} | cut -f2 | sed 's/.__//' | sed 's/ (UID.*//' > ${id}.checkm.txt
-    to_ncbi_taxonomy.py ${id}.checkm.txt ${ncbi_names} > ${id}.checkm.taxIDs.txt
-    to_ncbi_taxonomy.py ${dada2_lineage} ${ncbi_names} > ${id}.dada2.taxIDs.txt
-
-    # Compute LCA, iuLCA and RTLpath for each software
-    taxonomy_tools.py ${mash_taxIDs} ${ncbi_nodes} > ${id}.mash.taxIDs.summary
-    taxonomy_tools.py ${id}.dada2.taxIDs.txt ${ncbi_nodes} > ${id}.dada2.taxIDs.summary
-    taxonomy_tools.py ${centrifuge_taxIDs} ${ncbi_nodes} > ${id}.centrifuge.taxIDs.summary
-    taxonomy_tools.py ${kaiju_taxIDs} ${ncbi_nodes} > ${id}.kaiju.taxIDs.summary
-    taxonomy_tools.py ${id}.checkm.taxIDs.txt ${ncbi_nodes} > ${id}.checkm.taxIDs.summary
-
-    # Extract LCA (for Mash and CheckM) and iuLCA (for the remaining)
-    grep -w "^LCA" ${id}.mash.taxIDs.summary | cut -f2 >> ${id}.taxIDs.txt
-    grep -w "^iuLCA" ${id}.dada2.taxIDs.summary | cut -f2 >> ${id}.taxIDs.txt
-    grep -w "^iuLCA" ${id}.centrifuge.taxIDs.summary | cut -f2 >> ${id}.taxIDs.txt
-    grep -w "^iuLCA" ${id}.kaiju.taxIDs.summary | cut -f2 >> ${id}.taxIDs.txt
-    grep -w "^LCA" ${id}.checkm.taxIDs.summary | cut -f2 >> ${id}.taxIDs.txt
-
-    # Generate global summary, also conatining the final RTLpath
-    taxonomy_tools.py ${id}.taxIDs.txt ${ncbi_nodes} > ${id}.taxIDs.summary
+    camitaxonomy.py --names ${ncbi_names} \
+                    --nodes ${ncbi_nodes} \
+                    --mash ${mash_taxIDs} \
+                    --dada2 ${dada2_lineage} \
+                    --centrifuge ${centrifuge_taxIDs} \
+                    --kaiju ${kaiju_taxIDs} \
+                    --checkm ${checkm_lineage} \
+                    ${id} > ${id}.summary
     """
 }
