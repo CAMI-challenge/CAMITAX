@@ -25,7 +25,7 @@ As a last resort, you may run CAMITAX without software containers. However, this
 
 ```
 nextflow pull abremges/CAMITAX
-nextflow run abremges/CAMITAX/init.nf
+nextflow run abremges/CAMITAX/init.nf --db /path/to/db/folder
 ```
 
 ### Input
@@ -33,7 +33,7 @@ nextflow run abremges/CAMITAX/init.nf
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
 If your input genomes are in the folder `input/` with file extension `.fasta`, please run:
 ```
-nextflow run abremges/CAMITAX --i input --x fasta
+nextflow run abremges/CAMITAX --db /path/to/db/folder --i input --x fasta
 ```
 
 ### Output
