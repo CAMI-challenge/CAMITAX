@@ -28,8 +28,6 @@ nextflow pull abremges/CAMITAX
 nextflow run abremges/CAMITAX/init.nf
 ```
 
-**TODO:** [Upload CAMITAX databases and provide download script.](https://github.com/abremges/CAMITAX/issues/2)
-
 ### Input
 
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
@@ -41,9 +39,6 @@ nextflow run abremges/CAMITAX --i input --x fasta
 ### Output
 
 CAMITAX outputs a tab-seperated file containing the individual taxon assignments.
-
-**TODO:** [Format and describe CAMITAX output.](https://github.com/abremges/CAMITAX/issues/4)
-
 
 ## Citation
 
