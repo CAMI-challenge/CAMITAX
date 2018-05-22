@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.3.0'
+camitax_version = 'v0.3.1'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -57,7 +57,7 @@ process mash {
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
     head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ANImax.txt
-    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t && \$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f2 -d',' > ${genome.baseName}.mash.taxIDs.txt
+    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t && \$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f2 -d'_' > ${genome.baseName}.mash.taxIDs.txt
     """
 }
 
@@ -214,7 +214,7 @@ centrifuge_taxIDs  .join(
 kaiju_taxIDs       .join(
 checkm_lineage )))) .set{ id_collection }
 
-process summarize {
+process taxonomy {
     tag "${id}"
 
     publishDir "data/${id}"
@@ -225,7 +225,7 @@ process summarize {
     set val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage) from id_collection
 
     output:
-    file "${id}.summary"
+    file "${id}.summary" into camitax_summaries
 
     script:
     ncbi_names = "${db}/taxonomy/names_20180510.dmp"
@@ -240,5 +240,25 @@ process summarize {
                     --kaiju ${kaiju_taxIDs} \
                     --checkm ${checkm_lineage} \
                     ${id} > ${id}.summary
+    """
+}
+
+process summary {
+    tag 'The Final Countdown'
+
+    publishDir 'data'
+    container = 'python'
+
+    input:
+    file summaryList from camitax_summaries.collect()
+
+    output:
+    file "camitax.tsv"
+
+    """
+    for every summary in ${summaryList}
+    do
+        cat \$summary >> camitax.tsv
+    done
     """
 }
