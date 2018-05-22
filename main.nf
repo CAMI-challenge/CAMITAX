@@ -255,9 +255,8 @@ process summary {
     output:
     file "camitax.tsv"
 
-    script:
     """
-    for every summary in ${summaryList}
+    for summary in ${summaryList}
     do
         cat \$summary >> camitax.tsv
     done
