@@ -38,7 +38,7 @@ nextflow run abremges/CAMITAX --db /path/to/db/folder --i input --x fasta
 
 ### Output
 
-CAMITAX outputs a tab-seperated file containing the individual taxon assignments.
+CAMITAX outputs a tab-seperated file containing the individual taxon assignments in the `data` folder.
 
 ## Citation
 
