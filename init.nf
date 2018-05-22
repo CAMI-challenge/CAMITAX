@@ -2,8 +2,38 @@
 
 params.db = 'camitax/db'
 
+process cache_taxonomy {
+    storeDir "${params.db}"
+    scratch = true
+
+    output:
+    file 'taxonomy/names_20180510.dmp'
+    file 'taxonomy/nodes_20180510.dmp'
+
+    """
+    wget https://zenodo.org/record/1250044/files/taxonomy_20180510.tar.gz
+    tar xfv taxonomy_*.tar.gz && rm taxonomy_*.tar.gz
+    """
+}
+
+process cache_mash_db {
+    storeDir "${params.db}"
+    scratch = true
+
+    output:
+    file 'mash/RefSeq_20180510.ids'
+    file 'mash/RefSeq_20180510.msh'
+    file 'mash/RefSeq10k_20180510.ids'
+    file 'mash/RefSeq10k_20180510.msh'
+
+    """
+    wget https://zenodo.org/record/1250044/files/mash_20180510.tar.gz
+    tar xfv mash_*.tar.gz && rm mash_*.tar.gz
+    """
+}
+
 process cache_dada2_db {
-    storeDir "${params.db}/dada2/"
+    storeDir "${params.db}/dada2"
     scratch = true
 
     output:
@@ -20,8 +50,37 @@ process cache_dada2_db {
     """
 }
 
+process cache_centrifuge_db {
+    storeDir "${params.db}"
+    scratch = true
+
+    output:
+    file 'centrifuge/proGenomes_20180510.1.cf'
+    file 'centrifuge/proGenomes_20180510.2.cf'
+    file 'centrifuge/proGenomes_20180510.3.cf'
+    file 'centrifuge/proGenomes_20180510.4.cf'
+
+    """
+    wget https://zenodo.org/record/1250044/files/centrifuge_20180510.tar.gz
+    tar xfv centrifuge_*.tar.gz && rm centrifuge_*.tar.gz
+    """
+}
+
+process cache_kaiju_db {
+    storeDir "${params.db}"
+    scratch = true
+
+    output:
+    file 'kaiju/proGenomes_20180510.fmi'
+
+    """
+    wget https://zenodo.org/record/1250044/files/kaiju_20180510.tar.gz
+    tar xfv kaiju_*.tar.gz && rm kaiju_*.tar.gz
+    """
+}
+
 process cache_checkm_db {
-    storeDir "${params.db}/checkm/"
+    storeDir "${params.db}/checkm"
     scratch = true
 
     output:
@@ -60,6 +119,6 @@ process cache_checkm_db {
 
     """
     wget https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
-    tar xfv checkm_data_*.tar.gz && rm *.tar.gz
+    tar xfv checkm_*.tar.gz && rm checkm_*.tar.gz
     """
 }
