@@ -258,7 +258,12 @@ process summary {
     """
     for summary in ${summaryList}
     do
-        cat \$summary >> camitax.tsv
+        head -n 1 \$summary > camitax.tsv
+        break
+    done
+    for summary in ${summaryList}
+    do
+        tail -n +2 \$summary >> camitax.tsv
     done
     """
 }
