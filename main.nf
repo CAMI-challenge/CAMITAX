@@ -255,6 +255,7 @@ process summary {
     output:
     file "camitax.tsv"
 
+    script:
     """
     for every summary in ${summaryList}
     do
