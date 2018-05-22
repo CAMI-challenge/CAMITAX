@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.3.1'
+camitax_version = 'v0.3.2'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -99,12 +99,13 @@ process checkm {
 }
 
 // TODO Multithreading?
+// TODO Adjust memory?
 process dada2 {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 8
-    memory = '16 GB'
+    cpus = 1
+    memory = '8 GB'
 
     input:
     file db
@@ -161,7 +162,7 @@ process centrifuge {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 16
+    cpus = 8
     memory '24 GB'
 
     input:
@@ -184,7 +185,7 @@ process kaiju {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 16
+    cpus = 8
     memory '16 GB'
 
     input:
