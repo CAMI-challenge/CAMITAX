@@ -4,7 +4,7 @@ params.db = 'camitax/db'
 
 process cache_taxonomy {
     storeDir "${params.db}"
-    scratch = true
+    // scratch = true
 
     output:
     file 'taxonomy/names_20180510.dmp'
@@ -18,7 +18,7 @@ process cache_taxonomy {
 
 process cache_mash_db {
     storeDir "${params.db}"
-    scratch = true
+    // scratch = true
 
     output:
     file 'mash/RefSeq_20180510.ids'
@@ -34,7 +34,7 @@ process cache_mash_db {
 
 process cache_dada2_db {
     storeDir "${params.db}/dada2"
-    scratch = true
+    // scratch = true
 
     output:
     file 'rdp_train_set_16.fa.gz'
@@ -52,7 +52,7 @@ process cache_dada2_db {
 
 process cache_centrifuge_db {
     storeDir "${params.db}"
-    scratch = true
+    // scratch = true
 
     output:
     file 'centrifuge/proGenomes_20180510.1.cf'
@@ -68,7 +68,7 @@ process cache_centrifuge_db {
 
 process cache_kaiju_db {
     storeDir "${params.db}"
-    scratch = true
+    // scratch = true
 
     output:
     file 'kaiju/proGenomes_20180510.fmi'
@@ -81,7 +81,7 @@ process cache_kaiju_db {
 
 process cache_checkm_db {
     storeDir "${params.db}/checkm"
-    scratch = true
+    // scratch = true
 
     output:
     file 'distributions/cd_dist.txt'
