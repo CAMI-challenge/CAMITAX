@@ -206,7 +206,7 @@ def main():
 
     taxID = low_taxonomy
 
-    novelty_ranks = {0:'NA', 1:'Known superkingdom', 2:'Known phylum', 3:'Known class', 4:'Known order', 5:'Known family', 6:'Known genus', 7:'Known species'}
+    novelty_ranks = {0:'NA', 1:'superkingdom', 2:'phylum', 3:'class', 4:'order', 5:'family', 6:'genus', 7:'species', 8:'strain'}
     tax_lineage = getLineage(taxID)
     novelty_category = novelty_ranks[0]
     for node_taxon in tax_lineage[::-1]:
@@ -214,9 +214,11 @@ def main():
             novelty_category = novelty_ranks[defined_ranks[node_taxon]]
             break
 
-    print("Genome\ttaxID\tNovelty_category\tANI\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
-    print("{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
-        .format(args.name, taxID, novelty_category, ani_max, completeness, contamination,
+    classification_level = novelty_ranks[defined_ranks[taxID]]
+
+    print("Genome\ttaxID\ttaxLvl\tseqLvl\tANI\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
+    print("{}\t{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+        .format(args.name, taxID, classification_level, novelty_category, ani_max, completeness, contamination,
                 contigs, N50_contigs, gc_content, coding_density, predicted_genes,
                 low_taxonomy, rtl_taxonomy, mash_taxonomy, dada2_taxonomy, centrifuge_taxonomy, kaiju_taxonomy, checkm_taxonomy))
 
