@@ -130,6 +130,7 @@ def main():
     parser.add_argument("--kaiju", help="Kaiju output", required=True)
     parser.add_argument("--checkm", help="CheckM output", required=True)
     parser.add_argument("--known", help="taxIDs of sequenced genomes", required=True)
+    parser.add_argument("--animax", help="best ANI hit", required=True)
     parser.add_argument("name", help="Genome name/prefix")
     args = parser.parse_args()
 
@@ -152,25 +153,25 @@ def main():
     mash_taxon_list = []
     with open(args.mash) as f:
         for line in f:
-            mash_taxon_list.append(int(line))
+            mash_taxon_list.append(int(line.strip()))
     mash_taxonomy = getLCA(mash_taxon_list)
 
     dada2_taxon_list = []
     with open(args.dada2) as f:
         for line in f:
-            dada2_taxon_list.append(getTaxID(line))
+            dada2_taxon_list.append(getTaxID(line.strip()))
     dada2_taxonomy = getIuLCA(dada2_taxon_list)
 
     centrifuge_taxon_list = []
     with open(args.centrifuge) as f:
         for line in f:
-            centrifuge_taxon_list.append(int(line))
+            centrifuge_taxon_list.append(int(line.strip()))
     centrifuge_taxonomy = getIuLCA(centrifuge_taxon_list)
 
     kaiju_taxon_list = []
     with open(args.kaiju) as f:
         for line in f:
-            kaiju_taxon_list.append(int(line))
+            kaiju_taxon_list.append(int(line.strip()))
     kaiju_taxonomy = getIuLCA(kaiju_taxon_list)
 
     checkm_taxon_list = []
@@ -192,7 +193,12 @@ def main():
 
     with open(args.known) as f:
         for line in f:
-            sequenced_taxa.add(int(line))
+            sequenced_taxa.add(int(line.strip()))
+
+    with open(args.animax) as f:
+        for line in f:
+            ani_max = 100*float(line.strip()) # TODO Should be moved to parste_mash_output() eventually
+
 
     taxID = low_taxonomy
 
@@ -204,9 +210,9 @@ def main():
             novelty_category = novelty_ranks[defined_ranks[node_taxon]]
             break
 
-    print("Genome\ttaxID\tNovelty_category\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
-    print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
-        .format(args.name, taxID, novelty_category, completeness, contamination,
+    print("Genome\ttaxID\tNovelty_category\tANI\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
+    print("{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+        .format(args.name, taxID, novelty_category, ani_max, completeness, contamination,
                 contigs, N50_contigs, gc_content, coding_density, predicted_genes,
                 low_taxonomy, rtl_taxonomy, mash_taxonomy, dada2_taxonomy, centrifuge_taxonomy, kaiju_taxonomy, checkm_taxonomy))
 

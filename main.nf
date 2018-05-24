@@ -229,6 +229,7 @@ process taxonomy {
     file "${id}.summary" into camitax_summaries
 
     script:
+    mash_ids = "${db}/mash/RefSeq_20180510.ids"
     ncbi_names = "${db}/taxonomy/names_20180510.dmp"
     ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
 
@@ -240,6 +241,8 @@ process taxonomy {
                     --centrifuge ${centrifuge_taxIDs} \
                     --kaiju ${kaiju_taxIDs} \
                     --checkm ${checkm_lineage} \
+                    --known ${mash_ids} \
+                    --animax ${mash_ANImax}
                     ${id} > ${id}.summary
     """
 }
