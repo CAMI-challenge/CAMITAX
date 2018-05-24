@@ -214,7 +214,7 @@ def main():
             novelty_category = novelty_ranks[defined_ranks[node_taxon]]
             break
 
-    classification_level = novelty_ranks[defined_ranks[taxID]]
+    classification_level = novelty_ranks[getDepth(taxID)]
 
     print("Genome\ttaxID\ttaxLvl\tseqLvl\tANI\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
     print("{}\t{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
