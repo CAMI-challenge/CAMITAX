@@ -10,7 +10,10 @@ sequenced_taxa = set()
 
 def getParent(ncbi_id):
     """Returns a node's parent node (or zero for the root node)"""
-    return parent_id_map[ncbi_id] if ncbi_id > 1 else 0
+    parent_id = 0
+    if ncbi_id in parent_id_map:
+        parent_id = parent_id_map[ncbi_id]
+    return parent_id if ncbi_id > 1 else 0
 
 def getDepth(ncbi_id):
     """Returns the "real" depth of a taxon in the taxonomic tree"""
@@ -193,7 +196,8 @@ def main():
 
     with open(args.known) as f:
         for line in f:
-            sequenced_taxa.add(int(line.strip()))
+            for taxon in getLineage(int(line.strip())):
+                sequenced_taxa.add(taxon)
 
     with open(args.animax) as f:
         for line in f:
