@@ -6,20 +6,13 @@ from collections import Counter
 name_to_ncbi_id = {}
 parent_id_map = {}
 defined_ranks = {}
+sequenced_taxa = set()
 
 def getParent(ncbi_id):
     """Returns a node's parent node (or zero for the root node)"""
     return parent_id_map[ncbi_id] if ncbi_id > 1 else 0
 
 def getDepth(ncbi_id):
-    """Returns the depth of a taxon in the taxonomic tree"""
-    depth = 0
-    while ncbi_id != 0:
-        depth += 1
-        ncbi_id = getParent(ncbi_id)
-    return depth
-
-def getRealDepth(ncbi_id):
     """Returns the "real" depth of a taxon in the taxonomic tree"""
     while ncbi_id not in defined_ranks and ncbi_id > 1:
         ncbi_id = getParent(ncbi_id)
@@ -94,6 +87,25 @@ def getRTLpath(taxon_list):
             node_taxon = getParent(node_taxon)
     return getLCA([k for m in [max(rtl_counter.values())] for k,v in rtl_counter.items() if v == m])
 
+def getLowNode(taxon_list):
+    """Get the lowest node without siblings in the tree spanned by taxon_list"""
+    if not taxon_list:
+        return 1
+    ranks = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[]}
+    for taxon in taxon_list:
+        for ncbi_id in getLineage(taxon):
+            ranks[defined_ranks[ncbi_id]].append(ncbi_id)
+    low_node = 1
+    for rank in range(1, 8):
+        rank_counter = Counter(ranks[rank])
+        n = len(rank_counter)
+        if n == 1:
+            low_node = ranks[rank][0]
+        elif n > 1:
+            break
+        # n == 0: incomplete lineage, skip gaps (e.g. for members of candidate phyla)
+    return low_node
+
 def getTaxID(name):
     """Match scientific name to NCBI Taxonomy ID"""
     taxa = name.rstrip().replace('; ',';').split(';')
@@ -112,11 +124,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--names", help="NCBI Taxonomy file: names.dmp", required=True)
     parser.add_argument("--nodes", help="NCBI Taxonomy file: nodes.dmp", required=True)
-    parser.add_argument("--mash", help="Mash output, sorted", required=True)
+    parser.add_argument("--mash", help="Mash output", required=True)
     parser.add_argument("--dada2", help="Dada2 lineage", required=True)
-    parser.add_argument("--centrifuge", help="Centrifuge output files: ", required=True)
-    parser.add_argument("--kaiju", help="CheckM lineage file: *.checkm.tsv", required=True)
-    parser.add_argument("--checkm", help="CheckM lineage file: *.checkm.tsv", required=True)
+    parser.add_argument("--centrifuge", help="Centrifuge output", required=True)
+    parser.add_argument("--kaiju", help="Kaiju output", required=True)
+    parser.add_argument("--checkm", help="CheckM output", required=True)
+    parser.add_argument("--known", help="taxIDs of sequenced genomes", required=True)
     parser.add_argument("name", help="Genome name/prefix")
     args = parser.parse_args()
 
@@ -164,20 +177,38 @@ def main():
     with open(args.checkm) as f:
         next(f)
         for line in f:
-            (_, name, *_) = line.split('\t')
+            (_, name, _, _, _, completeness, contamination, strain_heterogeneity, genome_size, _, _, contigs, _, N50_contigs, _, _, _, _, gc_content, _, coding_density, _, predicted_genes, *_) = line.split('\t')
             sname = name[3:-(len(name)-name.index(" (UID"))]
             checkm_taxon_list.append(getTaxID(sname))
     checkm_taxonomy = getIuLCA(checkm_taxon_list)
+
+    low_taxonomy = getLowNode([ mash_taxonomy, dada2_taxonomy,
+                                centrifuge_taxonomy, kaiju_taxonomy,
+                                checkm_taxonomy ])
 
     rtl_taxonomy = getRTLpath([ mash_taxonomy, dada2_taxonomy,
                                 centrifuge_taxonomy, kaiju_taxonomy,
                                 checkm_taxonomy ])
 
-    print("Genome\ttaxID\tMash\tDada2\tCentrifuge\tKaiju\tCheckM")
-    print("{}\t{}\t{}\t{}\t{}\t{}\t{}".format(args.name, rtl_taxonomy,
-                                              mash_taxonomy, dada2_taxonomy,
-                                              centrifuge_taxonomy, kaiju_taxonomy,
-                                              checkm_taxonomy))
+    with open(args.known) as f:
+        for line in f:
+            sequenced_taxa.add(int(line))
+
+    taxID = low_taxonomy
+
+    novelty_ranks = {0:'NA', 1:'Known superkingdom', 2:'Known phylum', 3:'Known class', 4:'Known order', 5:'Known family', 6:'Known genus', 7:'Known species'}
+    tax_lineage = getLineage(taxID)
+    novelty_category = novelty_ranks[0]
+    for node_taxon in tax_lineage[::-1]:
+        if node_taxon in sequenced_taxa:
+            novelty_category = novelty_ranks[defined_ranks[node_taxon]]
+            break
+
+    print("Genome\ttaxID\tNovelty_category\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
+    print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+        .format(args.name, taxID, novelty_category, completeness, contamination,
+                contigs, N50_contigs, gc_content, coding_density, predicted_genes,
+                low_taxonomy, rtl_taxonomy, mash_taxonomy, dada2_taxonomy, centrifuge_taxonomy, kaiju_taxonomy, checkm_taxonomy))
 
 
 if __name__ == "__main__":
