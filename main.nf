@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.4.0'
+camitax_version = 'v0.4.1'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -242,7 +242,7 @@ process taxonomy {
                     --kaiju ${kaiju_taxIDs} \
                     --checkm ${checkm_lineage} \
                     --known ${mash_ids} \
-                    --animax ${mash_ANImax}
+                    --animax ${mash_ANImax} \
                     ${id} > ${id}.summary
     """
 }
