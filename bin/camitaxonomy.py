@@ -21,6 +21,14 @@ def getDepth(ncbi_id):
         ncbi_id = getParent(ncbi_id)
     return defined_ranks[ncbi_id] if ncbi_id > 1 else 0
 
+def isBacOrArc(ncbi_id):
+    """Returns True if ncbi_id is bacterial or archaeal"""
+    while ncbi_id != 0:
+        if ncbi_id == 2 or ncbi_id == 2157:
+            return True
+        ncbi_id = getParent(ncbi_id)
+    return False
+
 def getLineage(ncbi_id):
     """Returns the defined full lineage (as NCBI IDs) of a taxon"""
     lineage = []
@@ -150,7 +158,7 @@ def main():
         for line in f:
             (ncbi_id, name, _, name_class, *_) = line.split('|')
             ncbi_id, name, name_class = int(ncbi_id.strip()), name.strip(), name_class.strip()
-            if name_class == "scientific name":
+            if name_class == "scientific name" and isBacOrArc(ncbi_id):
                 name_to_ncbi_id[name] = ncbi_id
 
     mash_taxon_list = []
