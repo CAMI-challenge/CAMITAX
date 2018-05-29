@@ -85,11 +85,6 @@ process checkm {
     checkm_db = "${db}/checkm/"
 
     """
-    # Make sure to fix directory permissions, no matter what
-    set -e
-    set -u
-    trap 'find . -type d -exec chmod 777 {} +' INT TERM EXIT USR1 USR2
-
     # Set CheckM root data location
     echo ${checkm_db} | checkm data setRoot ${checkm_db}
 
