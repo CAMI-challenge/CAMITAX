@@ -85,13 +85,8 @@ process checkm {
     checkm_db = "${db}/checkm/"
 
     """
-    # Prepare CheckM output folders and "fix" permissions
-    mkdir -p -m 777 ssu_finder
-    mkdir -p -m 777 checkm
-    mkdir -p -m 777 checkm/bins
-    mkdir -p -m 777 checkm/bins/${id}
-    mkdir -p -m 777 checkm/storage
-    mkdir -p -m 777 checkm/storage/tree
+    # Make sure to fix directory permissions, no matter what
+    trap 'find . -type d -exec chmod 777 {} +' INT TERM EXIT
 
     # Set CheckM root data location
     echo ${checkm_db} | checkm data setRoot ${checkm_db}
