@@ -42,14 +42,13 @@ db = Channel.fromPath( "${params.db}", type: 'dir').first()
 process mash {
     tag "${id}"
 
-    publishDir "data/${id}"
-
     input:
     file db
     set val(id), file(genome) from mash_genomes
 
     output:
     set id, "${id}.mash.ANImax.txt", "${id}.mash.taxIDs.txt" into mash_ANImax_taxIDs
+    file '**'
 
     script:
     mash_index = "${db}/mash/RefSeq_20180510.msh"
@@ -68,8 +67,6 @@ process mash {
  */
 process checkm {
     tag "${id}"
-
-    publishDir "data/${id}"
     cpus = 8
     memory '16 GB'
 
@@ -80,6 +77,7 @@ process checkm {
     output:
     set id, "${id}.ssu.fna" into rRNA_fasta
     set id, "${id}.checkm.tsv" into checkm_lineage
+    file '**'
 
     script:
     checkm_db = "${db}/checkm/"
@@ -102,9 +100,6 @@ process checkm {
 // TODO Adjust memory?
 process dada2 {
     tag "${id}"
-
-    publishDir "data/${id}"
-    cpus = 1
     memory = '8 GB'
 
     input:
@@ -113,6 +108,7 @@ process dada2 {
 
     output:
     set id, "${id}.dada2.txt" into dada2_lineage
+    file '**'
 
     script:
     if ( params.dada2_db == 'silva' ) {
@@ -144,14 +140,13 @@ process dada2 {
 process prodigal {
     tag "${id}"
 
-    publishDir "data/${id}"
-
     input:
     set val(id), file(genome) from prodigal_genomes
 
     output:
     set id, "${id}.genes.faa" into faa_kaiju
     set id, "${id}.genes.fna" into fna_centrifuge
+    file '**'
 
     """
     prodigal -a ${id}.genes.faa -d ${id}.genes.fna -i ${genome}
@@ -160,8 +155,6 @@ process prodigal {
 
 process centrifuge {
     tag "${id}"
-
-    publishDir "data/${id}"
     cpus = 8
     memory '24 GB'
 
@@ -171,6 +164,7 @@ process centrifuge {
 
     output:
     set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_taxIDs
+    file '**'
 
     script:
     centrifuge_index = "${db}/centrifuge/proGenomes_20180510"
@@ -183,8 +177,6 @@ process centrifuge {
 
 process kaiju {
     tag "${id}"
-
-    publishDir "data/${id}"
     cpus = 8
     memory '16 GB'
 
@@ -194,6 +186,7 @@ process kaiju {
 
     output:
     set id, "${id}.kaiju.taxIDs.txt" into kaiju_taxIDs
+    file '**'
 
     script:
     kaiju_index = "${db}/kaiju/proGenomes_20180510.fmi"
@@ -217,8 +210,6 @@ checkm_lineage )))) .set{ id_collection }
 
 process taxonomy {
     tag "${id}"
-
-    publishDir "data/${id}"
     container = 'python'
 
     input:
@@ -227,6 +218,7 @@ process taxonomy {
 
     output:
     file "${id}.summary" into camitax_summaries
+    file '**'
 
     script:
     mash_ids = "${db}/mash/RefSeq_20180510.ids"
@@ -249,8 +241,7 @@ process taxonomy {
 
 process summary {
     tag 'The Final Countdown'
-
-    publishDir 'data'
+    publishDir 'data', mode: 'copy'
     container = 'python'
 
     input:
@@ -258,6 +249,7 @@ process summary {
 
     output:
     file "camitax.tsv"
+    file '**'
 
     """
     for summary in ${summaryList}
