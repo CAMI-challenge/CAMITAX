@@ -81,6 +81,8 @@ process checkm {
     set id, "${id}.ssu.fna" into rRNA_fasta
     set id, "${id}.checkm.tsv" into checkm_lineage
 
+    afterScript 'find . -type d -exec chmod 777 {} +'
+
     script:
     checkm_db = "${db}/checkm/"
 
@@ -96,8 +98,6 @@ process checkm {
     checkm lineage_wf -t ${task.cpus} --reduced_tree -x ${params.x} . checkm
     checkm qa -o 2 --tab_table checkm/lineage.ms checkm > ${id}.checkm.tsv
     """
-
-    afterScript 'find . -type d -exec chmod 777 {} +'
 }
 
 // TODO Multithreading?
