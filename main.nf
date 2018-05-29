@@ -84,8 +84,11 @@ process checkm {
     script:
     checkm_db = "${db}/checkm/"
 
+    afterScript: 'find . -type d -exec chmod 777 {} +'
+
     """
     # Set CheckM root data location
+    chmod 777 /usr/local/lib/python2.7/site-packages/checkm/DATA_CONFIG
     echo ${checkm_db} | checkm data setRoot ${checkm_db}
 
     # Extract 16S rRNA gene sequences with Nhmmer
@@ -95,8 +98,6 @@ process checkm {
     # Phylogenetic placement onto reduced reference tree
     checkm lineage_wf -t ${task.cpus} --reduced_tree -x ${params.x} . checkm
     checkm qa -o 2 --tab_table checkm/lineage.ms checkm > ${id}.checkm.tsv
-
-    find . -type d -exec chmod 777 {} +
     """
 }
 
