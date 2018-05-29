@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.5.3'
+camitax_version = 'v0.6.0'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
