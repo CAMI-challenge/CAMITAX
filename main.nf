@@ -81,14 +81,19 @@ process checkm {
     set id, "${id}.ssu.fna" into rRNA_fasta
     set id, "${id}.checkm.tsv" into checkm_lineage
 
-    afterScript 'find . -type d -exec chmod 777 {} +'
-
     script:
     checkm_db = "${db}/checkm/"
 
     """
+    # Prepare CheckM output folders and "fix" permissions
+    mkdir -p -m 777 ssu_finder
+    mkdir -p -m 777 checkm
+    mkdir -p -m 777 checkm/bins
+    mkdir -p -m 777 checkm/bins/${id}
+    mkdir -p -m 777 checkm/storage
+    mkdir -p -m 777 checkm/storage/tree
+
     # Set CheckM root data location
-    chmod 777 /usr/local/lib/python2.7/site-packages/checkm/DATA_CONFIG
     echo ${checkm_db} | checkm data setRoot ${checkm_db}
 
     # Extract 16S rRNA gene sequences with Nhmmer
