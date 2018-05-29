@@ -84,7 +84,7 @@ process checkm {
     script:
     checkm_db = "${db}/checkm/"
 
-    afterScript: 'find . -type d -exec chmod 777 {} +'
+    afterScript 'find . -type d -exec chmod 777 {} +'
 
     """
     # Set CheckM root data location
