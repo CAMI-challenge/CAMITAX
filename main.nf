@@ -81,10 +81,10 @@ process checkm {
     set id, "${id}.ssu.fna" into rRNA_fasta
     set id, "${id}.checkm.tsv" into checkm_lineage
 
+    afterScript 'find . -type d -exec chmod 777 {} +'
+
     script:
     checkm_db = "${db}/checkm/"
-
-    afterScript 'find . -type d -exec chmod 777 {} +'
 
     """
     # Set CheckM root data location
