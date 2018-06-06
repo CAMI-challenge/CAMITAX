@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.6.0'
+camitax_version = 'v0.6.1'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -24,11 +24,8 @@ Channel
     .into {
         input_genomes;
         mash_genomes;
-        barrnap_genomes;
-        bedtools_genomes;
         prodigal_genomes;
-        checkm_genomes;
-        summary_genomes
+        checkm_genomes
     }
 
 println("Input genomes:")
