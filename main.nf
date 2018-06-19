@@ -149,9 +149,11 @@ process prodigal {
     output:
     set id, "${id}.genes.faa" into faa_kaiju
     set id, "${id}.genes.fna" into fna_centrifuge
+    set id, "${id}.genes.cnt" into genes_cnt
 
     """
     prodigal -a ${id}.genes.faa -d ${id}.genes.fna -i ${genome}
+    grep -c "^>" ${id}.genes.faa > ${id}.genes.cnt
     """
 }
 
@@ -210,7 +212,8 @@ mash_ANImax_taxIDs .join(
 dada2_lineage      .join(
 centrifuge_taxIDs  .join(
 kaiju_taxIDs       .join(
-checkm_lineage )))) .set{ id_collection }
+checkm_lineage     .join(
+genes_cnt    ))))) .set{ id_collection }
 
 process taxonomy {
     tag "${id}"
@@ -220,7 +223,7 @@ process taxonomy {
 
     input:
     file db
-    set val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage) from id_collection
+    set val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage), file(genes_cnt) from id_collection
 
     output:
     file "${id}.summary" into camitax_summaries
@@ -240,6 +243,7 @@ process taxonomy {
                     --checkm ${checkm_lineage} \
                     --known ${mash_ids} \
                     --animax ${mash_ANImax} \
+                    --genes ${genes_cnt} \
                     ${id} > ${id}.summary
     """
 }

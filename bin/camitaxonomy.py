@@ -4,6 +4,7 @@ import argparse
 from collections import Counter
 
 name_to_ncbi_id = {}
+ncbi_id_to_name = {}
 parent_id_map = {}
 defined_ranks = {}
 sequenced_taxa = set()
@@ -64,7 +65,7 @@ def getLowest(taxon_list):
             taxon = getLCA([taxon, t])
     return taxon
 
-def getIuLCA(taxon_list):
+def getIuLCA(taxon_list, threshold):
     """Returns the intersection union LCA of all taxa in taxon_list"""
     if not taxon_list:
         return 1
@@ -76,7 +77,7 @@ def getIuLCA(taxon_list):
     for rank in range(7, 0, -1):
         rank_counter = Counter(ranks[rank])
         if rank_counter:
-            iuLCA_taxon = getLowest([k for m in [min(rank_counter.values())] for k,v in rank_counter.items() if v >= 0.5*len(taxon_list)])
+            iuLCA_taxon = getLowest([k for m in [min(rank_counter.values())] for k,v in rank_counter.items() if v >= threshold])
         if iuLCA_taxon > 1:
             break
     return iuLCA_taxon
@@ -119,13 +120,13 @@ def getLowNode(taxon_list):
 
 def getTaxID(name):
     """Match scientific name to NCBI Taxonomy ID"""
-    taxa = name.rstrip().replace('; ',';').split(';')
+    taxa = name.rstrip().replace('; ',';').replace('_',' ').split(';')
     ncbi_id = 1
     species = ' '.join(taxa[-2:])
     if species in name_to_ncbi_id:
         ncbi_id = name_to_ncbi_id[species]
     else:
-        for taxon in reversed(taxa[:-1]):
+        for taxon in reversed(taxa):
             if taxon in name_to_ncbi_id:
                 ncbi_id = name_to_ncbi_id[taxon]
                 break;
@@ -142,6 +143,7 @@ def main():
     parser.add_argument("--checkm", help="CheckM output", required=True)
     parser.add_argument("--known", help="taxIDs of sequenced genomes", required=True)
     parser.add_argument("--animax", help="best ANI hit", required=True)
+    parser.add_argument("--genes", help="number of genes", required=True)
     parser.add_argument("name", help="Genome name/prefix")
     args = parser.parse_args()
 
@@ -160,6 +162,7 @@ def main():
             ncbi_id, name, name_class = int(ncbi_id.strip()), name.strip(), name_class.strip()
             if name_class == "scientific name" and isBacOrArc(ncbi_id):
                 name_to_ncbi_id[name] = ncbi_id
+                ncbi_id_to_name[ncbi_id] = name
 
     mash_taxon_list = []
     with open(args.mash) as f:
@@ -171,19 +174,27 @@ def main():
     with open(args.dada2) as f:
         for line in f:
             dada2_taxon_list.append(getTaxID(line.strip()))
-    dada2_taxonomy = getIuLCA(dada2_taxon_list)
+    dada2_taxonomy = getLowNode(dada2_taxon_list)
 
+    n_genes = 0
+    with open(args.genes_cnt) as f:
+        n_genes = int(line.strip())
+
+    # TODO BUG Check number of hits ffs!
+    # TODO BUG Require 50% of genes, not 50% of hits
     centrifuge_taxon_list = []
     with open(args.centrifuge) as f:
         for line in f:
             centrifuge_taxon_list.append(int(line.strip()))
-    centrifuge_taxonomy = getIuLCA(centrifuge_taxon_list)
+    centrifuge_taxonomy = getIuLCA(centrifuge_taxon_list, 0.5*n_genes)
 
+    # TODO BUG Check number of hits ffs!
+    # TODO BUG Require 50% of genes, not 50% of hits
     kaiju_taxon_list = []
     with open(args.kaiju) as f:
         for line in f:
             kaiju_taxon_list.append(int(line.strip()))
-    kaiju_taxonomy = getIuLCA(kaiju_taxon_list)
+    kaiju_taxonomy = getIuLCA(kaiju_taxon_list, 0.5*n_genes)
 
     checkm_taxon_list = []
     with open(args.checkm) as f:
@@ -191,8 +202,9 @@ def main():
         for line in f:
             (_, name, _, _, _, completeness, contamination, strain_heterogeneity, genome_size, _, _, contigs, _, N50_contigs, _, _, _, _, gc_content, _, coding_density, _, predicted_genes, *_) = line.split('\t')
             sname = name[3:-(len(name)-name.index(" (UID"))]
+            # TODO Check that it works now (the underscore thingy)!
             checkm_taxon_list.append(getTaxID(sname))
-    checkm_taxonomy = getIuLCA(checkm_taxon_list)
+    checkm_taxonomy = getLowNode(checkm_taxon_list)
 
     low_taxonomy = getLowNode([ mash_taxonomy, dada2_taxonomy,
                                 centrifuge_taxonomy, kaiju_taxonomy,
@@ -213,6 +225,10 @@ def main():
 
 
     taxID = low_taxonomy
+    taxName = "NA"
+    # TODO Check if iterating over all keys until value matches is faster/better, we only need this once
+    if taxID in ncbi_id_to_name:
+        taxName = ncbi_id_to_name[taxID]
 
     novelty_ranks = {0:'NA', 1:'superkingdom', 2:'phylum', 3:'class', 4:'order', 5:'family', 6:'genus', 7:'species', 8:'strain'}
     tax_lineage = getLineage(taxID)
@@ -224,10 +240,11 @@ def main():
 
     classification_level = novelty_ranks[getDepth(taxID)]
 
-    print("Genome\ttaxID\ttaxLvl\tseqLvl\tANI\tCompleteness\tContamination\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
-    print("{}\t{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
-        .format(args.name, taxID, classification_level, novelty_category, ani_max, completeness, contamination,
-                contigs, N50_contigs, gc_content, coding_density, predicted_genes,
+    # TODO Check that scientific name, genome size, and strain heterogeneity works
+    print("Genome\ttaxID\ttaxName\ttaxLvl\tseqLvl\tANI\tCompleteness\tContamination\tStrain_heterogeneity\tGenome_size\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
+    print("{}\t{}\t{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+        .format(args.name, taxID, taxName, classification_level, novelty_category, ani_max, completeness, contamination, strain_heterogeneity,
+                genome_size, contigs, N50_contigs, gc_content, coding_density, predicted_genes,
                 low_taxonomy, rtl_taxonomy, mash_taxonomy, dada2_taxonomy, centrifuge_taxonomy, kaiju_taxonomy, checkm_taxonomy))
 
 
