@@ -20,7 +20,7 @@ process checkm {
     tag "${id}"
 
     publishDir "checkm/${id}"
-    cpus = 8
+    cpus = 4
     memory '40 GB'
 
     input:
