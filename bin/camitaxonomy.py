@@ -177,7 +177,7 @@ def main():
     dada2_taxonomy = getLowNode(dada2_taxon_list)
 
     n_genes = 0
-    with open(args.genes_cnt) as f:
+    with open(args.genes) as f:
         n_genes = int(line.strip())
 
     # TODO BUG Check number of hits ffs!
