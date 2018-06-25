@@ -178,7 +178,8 @@ def main():
 
     n_genes = 0
     with open(args.genes) as f:
-        n_genes = int(line.strip())
+        for line in f:
+            n_genes = int(line.strip())
 
     # TODO BUG Check number of hits ffs!
     # TODO BUG Require 50% of genes, not 50% of hits
