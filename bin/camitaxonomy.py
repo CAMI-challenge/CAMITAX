@@ -44,6 +44,8 @@ def getLCA(taxon_list):
     if not taxon_list:
         return 1
     lineage = getLineage(taxon_list[0])
+    if not lineage:
+        return 1
     for ncbi_id in taxon_list[1:]:
         while ncbi_id != 0:
             if ncbi_id in lineage:
