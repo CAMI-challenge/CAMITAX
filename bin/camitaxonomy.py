@@ -131,7 +131,7 @@ def getTaxID(name):
         for taxon in reversed(taxa):
             if taxon in name_to_ncbi_id:
                 ncbi_id = name_to_ncbi_id[taxon]
-                break;
+                break
     return ncbi_id
 
 def main():
