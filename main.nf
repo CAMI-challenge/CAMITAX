@@ -54,7 +54,7 @@ process mash {
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
     head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ANImax.txt
-    awk 'NR == 1 {t=\$3*1.1}; \$3 <= t && \$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f1 -d'_' > ${genome.baseName}.mash.taxIDs.txt
+    awk '\$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f1 -d'_' > ${genome.baseName}.mash.taxIDs.txt
     """
 }
 
