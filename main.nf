@@ -95,8 +95,6 @@ process checkm {
     """
 }
 
-// TODO Multithreading?
-// TODO Adjust memory?
 process dada2 {
     tag "${id}"
 

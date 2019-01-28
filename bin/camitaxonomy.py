@@ -183,16 +183,12 @@ def main():
         for line in f:
             n_genes = int(line.strip())
 
-    # TODO BUG Check number of hits ffs!
-    # TODO BUG Require 50% of genes, not 50% of hits
     centrifuge_taxon_list = []
     with open(args.centrifuge) as f:
         for line in f:
             centrifuge_taxon_list.append(int(line.strip()))
     centrifuge_taxonomy = getIuLCA(centrifuge_taxon_list, 0.5*n_genes)
 
-    # TODO BUG Check number of hits ffs!
-    # TODO BUG Require 50% of genes, not 50% of hits
     kaiju_taxon_list = []
     with open(args.kaiju) as f:
         for line in f:
@@ -205,7 +201,6 @@ def main():
         for line in f:
             (_, name, _, _, _, completeness, contamination, strain_heterogeneity, genome_size, _, _, contigs, _, N50_contigs, _, _, _, _, gc_content, _, coding_density, _, predicted_genes, *_) = line.split('\t')
             sname = name[3:-(len(name)-name.index(" (UID"))]
-            # TODO Check that it works now (the underscore thingy)!
             checkm_taxon_list.append(getTaxID(sname))
     checkm_taxonomy = getLowNode(checkm_taxon_list)
 
@@ -229,7 +224,7 @@ def main():
 
     taxID = low_taxonomy
     taxName = "NA"
-    # TODO Check if iterating over all keys until value matches is faster/better, we only need this once
+    # TODO Check if iterating over all keys until value matches is faster/better (we only need this once)
     if taxID in ncbi_id_to_name:
         taxName = ncbi_id_to_name[taxID]
 
@@ -243,7 +238,6 @@ def main():
 
     classification_level = novelty_ranks[getDepth(taxID)]
 
-    # TODO Check that scientific name, genome size, and strain heterogeneity works
     print("Genome\ttaxID\ttaxName\ttaxLvl\tseqLvl\tANI\tCompleteness\tContamination\tStrain_heterogeneity\tGenome_size\tContigs\tN50\tGC\tCoding_density\tPredicted_genes\tLowest\tRTLpath\tMash\tDada2\tCentrifuge\tKaiju\tCheckM\t")
     print("{}\t{}\t{}\t{}\t{}\t{:0.2f}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
         .format(args.name, taxID, taxName, classification_level, novelty_category, ani_max, completeness, contamination, strain_heterogeneity,
