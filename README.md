@@ -52,6 +52,5 @@ CAMITAX outputs a tab-seperated file `camitax.tsv` containing the individual tax
 
 ## Citation
 
-Please point to the CAMITAX GitHub repository and cite the CAMI flagship paper:
-* Bremges *et al.* (2019). **CAMITAX: Taxon labels for microbial genomes.** https://github.com/CAMI-challenge/CAMITAX
+* Bremges, Fritz, McHardy (2019). **CAMITAX: Taxon labels for microbial genomes.** *bioRxiv*, 532473 (preprint). doi:[10.1101/532473](https://doi.org/10.1101/532473)
 * Sczyrba, Hofmann, Belmann, *et al.* (2017). **Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software.** *Nature Methods*, 14, 11:1063–1071. doi:[10.1038/nmeth.4458](https://doi.org/10.1038/nmeth.4458)
