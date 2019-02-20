@@ -27,15 +27,15 @@ If Docker is no option, try [Singularity](https://singularity.lbl.gov/) instead.
 
 As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, the following (untested) code snippet should work: ``conda install --yes --channel "bioconda" --file requirements.txt``
 
-*If you need any help or further guidance: Please [get in touch](https://github.com/abremges/CAMITAX/issues)!*
+*If you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
 ## User Guide
 
 ### Installation
 
 ```
-nextflow pull abremges/CAMITAX
-nextflow run abremges/CAMITAX/init.nf --db /path/to/db/folder
+nextflow pull CAMI-challenge/CAMITAX
+nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 ```
 
 ### Input
@@ -43,7 +43,7 @@ nextflow run abremges/CAMITAX/init.nf --db /path/to/db/folder
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
 If your input genomes are in the folder `input/` with file extension `.fasta`, please run:
 ```
-nextflow run abremges/CAMITAX --db /path/to/db/folder --i input --x fasta
+nextflow run CAMI-challenge/CAMITAX --db /path/to/db/folder --i input --x fasta
 ```
 
 ### Output
