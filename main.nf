@@ -67,8 +67,6 @@ process checkm {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 8
-    memory '16 GB'
 
     input:
     file db
@@ -99,8 +97,6 @@ process dada2 {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 1
-    memory = '8 GB'
 
     input:
     file db
@@ -159,8 +155,6 @@ process centrifuge {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 8
-    memory '24 GB'
 
     input:
     file db
@@ -182,8 +176,6 @@ process kaiju {
     tag "${id}"
 
     publishDir "data/${id}"
-    cpus = 8
-    memory '16 GB'
 
     input:
     file db
