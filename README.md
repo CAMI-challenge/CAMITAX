@@ -13,7 +13,7 @@ CAMITAX uses Centrifuge and Kaiju to perform gene homology searches against nucl
 **(D) Phylogenetic placement.**
 CAMITAX uses Pplacer to place *G* onto a fixed reference tree, as implemented in CheckM, and estimates genome completeness and contamination using lineage-specific marker genes.
 **(E) Classification algorithm.**
-CAMITAX considers the lowest “consistent” assignment as the longest unambiguous root-to-node path in the taxonomic tree spanned by the five taxIDs derived in (A)–(D), i.e. it selects the lowest node contained in all possible root-to-leaf paths.
+CAMITAX considers the lowest “consistent” assignment as the longest unambiguous root-to-node path in the taxonomic tree spanned by the five taxIDs derived in (A)–(D), i.e. it retains the most specific, yet consistent taxonomic label among all tools.
 
 ## Requirements
 
