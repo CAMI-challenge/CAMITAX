@@ -15,6 +15,7 @@ mkdir mash_genomes && cut -f6,20 assembly_summary.txt | sed 's/ftp.*\///' | whil
 
 # Create the Mash index
 cd mash_genomes && mash sketch -p 32 -o ../RefSeq * && cd ..
+mash info -t RefSeq.msh | tail -n +2 | cut -f3 | cut -f1 -d'_' | sort | uniq > RefSeq.ids
 ```
 
 ## DADA2 reference databases
