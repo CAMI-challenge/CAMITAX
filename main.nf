@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.6.1'
+camitax_version = 'v0.6.2'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -38,7 +38,6 @@ db = Channel.fromPath( "${params.db}", type: 'dir').first()
  */
 process mash {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -65,7 +64,6 @@ process mash {
  */
 process checkm {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -95,7 +93,6 @@ process checkm {
 
 process dada2 {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -134,7 +131,6 @@ process dada2 {
  */
 process prodigal {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -153,7 +149,6 @@ process prodigal {
 
 process centrifuge {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -174,7 +169,6 @@ process centrifuge {
 
 process kaiju {
     tag "${id}"
-
     publishDir "data/${id}"
 
     input:
@@ -207,7 +201,6 @@ genes_cnt    ))))) .set{ id_collection }
 
 process taxonomy {
     tag "${id}"
-
     publishDir "data/${id}"
     container = 'python'
 
@@ -240,7 +233,6 @@ process taxonomy {
 
 process summary {
     tag 'The Final Countdown'
-
     publishDir 'data'
     container = 'python'
 
