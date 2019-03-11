@@ -48,6 +48,8 @@ nextflow run CAMI-challenge/CAMITAX --db /path/to/db/folder --i input --x fasta
 
 CAMITAX outputs a tab-seperated file `camitax.tsv` containing the individual taxon assignments in the `data` folder.
 
+*Again, if you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
+
 ## Citation
 
 * Bremges, Fritz, McHardy (2019). **CAMITAX: Taxon labels for microbial genomes.** *bioRxiv*, 532473 (preprint). doi:[10.1101/532473](https://doi.org/10.1101/532473)
