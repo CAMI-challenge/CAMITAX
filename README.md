@@ -33,10 +33,12 @@ As a last resort, you may run CAMITAX without software containers. However, this
 
 ### Installation
 
+CAMITAX relies on multiple reference databases (which we do not bundle by default, due to their sheer size). You can either [build them from scratch](https://github.com/CAMI-challenge/CAMITAX/blob/master/db/README.md) or simply use the "official" releases. To do so, please run:
 ```
 nextflow pull CAMI-challenge/CAMITAX
 nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 ```
+**Warning:** This will download ~30 GB of data, expect this to run a while! `/path/to/db/folder` should have >100 GB of available disk space. Note that you have to do this only once; simply specify the location in all future CAMITAX runs.
 
 ### Input
 
