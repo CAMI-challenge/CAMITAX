@@ -7,11 +7,11 @@ process cache_taxonomy {
     // scratch = true
 
     output:
-    file 'taxonomy/names_20180510.dmp'
-    file 'taxonomy/nodes_20180510.dmp'
+    file 'taxonomy/names_20190108.dmp'
+    file 'taxonomy/nodes_20190108.dmp'
 
     """
-    wget https://zenodo.org/record/1250044/files/taxonomy_20180510.tar.gz
+    wget https://zenodo.org/record/2597959/files/taxonomy_20190108.tar.gz
     tar xfv taxonomy_*.tar.gz && rm taxonomy_*.tar.gz
     """
 }
@@ -21,13 +21,11 @@ process cache_mash_db {
     // scratch = true
 
     output:
-    file 'mash/RefSeq_20180510.ids'
-    file 'mash/RefSeq_20180510.msh'
-    file 'mash/RefSeq10k_20180510.ids'
-    file 'mash/RefSeq10k_20180510.msh'
+    file 'mash/RefSeq_20190108.ids'
+    file 'mash/RefSeq_20190108.msh'
 
     """
-    wget https://zenodo.org/record/1250044/files/mash_20180510.tar.gz
+    wget https://zenodo.org/record/2597959/files/mash_20190108.tar.gz
     tar xfv mash_*.tar.gz && rm mash_*.tar.gz
     """
 }
@@ -55,13 +53,13 @@ process cache_centrifuge_db {
     // scratch = true
 
     output:
-    file 'centrifuge/proGenomes_20180510.1.cf'
-    file 'centrifuge/proGenomes_20180510.2.cf'
-    file 'centrifuge/proGenomes_20180510.3.cf'
-    file 'centrifuge/proGenomes_20180510.4.cf'
+    file 'centrifuge/proGenomes_20190108.1.cf'
+    file 'centrifuge/proGenomes_20190108.2.cf'
+    file 'centrifuge/proGenomes_20190108.3.cf'
+    file 'centrifuge/proGenomes_20190108.4.cf'
 
     """
-    wget https://zenodo.org/record/1250044/files/centrifuge_20180510.tar.gz
+    wget https://zenodo.org/record/2597959/files/centrifuge_20190108.tar.gz
     tar xfv centrifuge_*.tar.gz && rm centrifuge_*.tar.gz
     """
 }
@@ -71,10 +69,10 @@ process cache_kaiju_db {
     // scratch = true
 
     output:
-    file 'kaiju/proGenomes_20180510.fmi'
+    file 'kaiju/proGenomes_20190108.fmi'
 
     """
-    wget https://zenodo.org/record/1250044/files/kaiju_20180510.tar.gz
+    wget https://zenodo.org/record/2597959/files/kaiju_20190108.tar.gz
     tar xfv kaiju_*.tar.gz && rm kaiju_*.tar.gz
     """
 }

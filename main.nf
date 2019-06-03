@@ -48,7 +48,7 @@ process mash {
     set id, "${id}.mash.ANImax.txt", "${id}.mash.taxIDs.txt" into mash_ANImax_taxIDs
 
     script:
-    mash_index = "${db}/mash/RefSeq_20180510.msh"
+    mash_index = "${db}/mash/RefSeq_20190108.msh"
 
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
@@ -159,7 +159,7 @@ process centrifuge {
     set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_taxIDs
 
     script:
-    centrifuge_index = "${db}/centrifuge/proGenomes_20180510"
+    centrifuge_index = "${db}/centrifuge/proGenomes_20190108"
 
     """
     centrifuge -p ${task.cpus} -f -x ${centrifuge_index} ${genes} > ${id}.centrifuge.out
@@ -179,8 +179,8 @@ process kaiju {
     set id, "${id}.kaiju.taxIDs.txt" into kaiju_taxIDs
 
     script:
-    kaiju_index = "${db}/kaiju/proGenomes_20180510.fmi"
-    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
+    kaiju_index = "${db}/kaiju/proGenomes_20190108.fmi"
+    ncbi_nodes = "${db}/taxonomy/nodes_20190108.dmp"
 
     """
     kaiju -p -z ${task.cpus} -t ${ncbi_nodes} -f ${kaiju_index} -i ${genes} > ${id}.kaiju.out
@@ -202,7 +202,6 @@ genes_cnt    ))))) .set{ id_collection }
 process taxonomy {
     tag "${id}"
     publishDir "data/${id}"
-    container = 'python'
 
     input:
     file db
@@ -212,9 +211,9 @@ process taxonomy {
     file "${id}.summary" into camitax_summaries
 
     script:
-    mash_ids = "${db}/mash/RefSeq_20180510.ids"
-    ncbi_names = "${db}/taxonomy/names_20180510.dmp"
-    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
+    mash_ids = "${db}/mash/RefSeq_20190108.ids"
+    ncbi_names = "${db}/taxonomy/names_20190108.dmp"
+    ncbi_nodes = "${db}/taxonomy/nodes_20190108.dmp"
 
     """
     camitaxonomy.py --names ${ncbi_names} \
@@ -234,7 +233,6 @@ process taxonomy {
 process summary {
     tag 'The Final Countdown'
     publishDir 'data'
-    container = 'python'
 
     input:
     file summaryList from camitax_summaries.collect()
