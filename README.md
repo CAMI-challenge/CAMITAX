@@ -17,7 +17,9 @@ CAMITAX considers the lowest consistent assignment as the longest unambiguous ro
 
 ## Requirements
 
-All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX. You may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself.
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX.
+
+**Plan B:** You may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself.
 
 *If you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
