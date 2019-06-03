@@ -17,11 +17,9 @@ CAMITAX considers the lowest consistent assignment as the longest unambiguous ro
 
 ## Requirements
 
-All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/). This is the recommended way to run CAMITAX.
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX.
 
-**Plan B:** If Docker is no option, try [Singularity](https://singularity.lbl.gov/) instead. Please first consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/singularity.html) and then adjust the [CAMITAX configuration](nextflow.config) accordingly. In a nutshell, disable Docker and enable Singularity by replacing `docker.enabled = true` with `singularity.enabled = true`, and you should be all set.
-
-**Plan C:** As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, the following (untested) code snippet should work: ``conda install --yes --channel "bioconda" --file requirements.txt``
+**Plan B:** You may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself.
 
 *If you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
@@ -41,7 +39,7 @@ nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
 If your input genomes are in the folder `input/` with file extension `.fasta`, please run:
 ```
-nextflow run CAMI-challenge/CAMITAX --db /path/to/db/folder --i input --x fasta
+nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i input --x fasta
 ```
 
 ### Output
