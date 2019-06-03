@@ -11,7 +11,7 @@ process cache_taxonomy {
     file 'taxonomy/nodes_20190108.dmp'
 
     """
-    wget https://zenodo.org/record/2597959/files/taxonomy_20190108.tar.gz
+    wget https://zenodo.org/record/3237483/files/taxonomy_20190108.tar.gz
     tar xfv taxonomy_*.tar.gz && rm taxonomy_*.tar.gz
     """
 }
@@ -25,7 +25,7 @@ process cache_mash_db {
     file 'mash/RefSeq_20190108.msh'
 
     """
-    wget https://zenodo.org/record/2597959/files/mash_20190108.tar.gz
+    wget https://zenodo.org/record/3237483/files/mash_20190108.tar.gz
     tar xfv mash_*.tar.gz && rm mash_*.tar.gz
     """
 }
@@ -59,7 +59,7 @@ process cache_centrifuge_db {
     file 'centrifuge/proGenomes_20190108.4.cf'
 
     """
-    wget https://zenodo.org/record/2597959/files/centrifuge_20190108.tar.gz
+    wget https://zenodo.org/record/3237483/files/centrifuge_20190108.tar.gz
     tar xfv centrifuge_*.tar.gz && rm centrifuge_*.tar.gz
     """
 }
@@ -72,7 +72,7 @@ process cache_kaiju_db {
     file 'kaiju/proGenomes_20190108.fmi'
 
     """
-    wget https://zenodo.org/record/2597959/files/kaiju_20190108.tar.gz
+    wget https://zenodo.org/record/3237483/files/kaiju_20190108.tar.gz
     tar xfv kaiju_*.tar.gz && rm kaiju_*.tar.gz
     """
 }
