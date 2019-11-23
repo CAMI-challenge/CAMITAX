@@ -17,7 +17,7 @@ CAMITAX considers the lowest consistent assignment as the longest unambiguous ro
 
 ## Requirements
 
-All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX.
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX and (by default) CAMITAX requires 8 CPU cores and 24 GB of memory.
 
 **Plan B:** You may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself.
 
@@ -43,7 +43,6 @@ If your input genomes are in the folder `input/` with file extension `.fasta`, p
 ```
 nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i input --x fasta
 ```
-We recommend at least 8 CPU cores and 24 GB of memory to execute CAMITAX.
 
 ### Output
 
