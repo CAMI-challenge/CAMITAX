@@ -34,7 +34,7 @@ nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 ```
 **Warning:** This will download ~30 GB of data, expect this to run a while! `/path/to/db/folder` should have >100 GB of available disk space. Note that you have to do this only once; specify the location in all future CAMITAX runs.
 
-**Warning:** To foster reproducibility, we strongly recommend that you use our "official" [releases](https://doi.org/10.5281/zenodo.1250043) and we will continue to provide stable and versioned updates in the future.
+**Warning:** To foster reproducibility, we strongly recommend that you use our "official" releases and we will continue to provide stable and versioned updates in the future.
 
 ### Input
 
