@@ -43,6 +43,7 @@ If your input genomes are in the folder `input/` with file extension `.fasta`, p
 ```
 nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i input --x fasta
 ```
+We recommend at least 8 CPU cores and 24 GB of memory to execute CAMITAX.
 
 ### Output
 
