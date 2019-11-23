@@ -43,6 +43,10 @@ If your input genomes are in the folder `input/` with file extension `.fasta`, p
 ```
 nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i input --x fasta
 ```
+If you want to use Singularity instead of Docker (without sudo), please run instead:
+```
+nextflow run CAMI-challenge/CAMITAX -profile singularity --db /path/to/db/folder --i input --x fasta
+```
 
 ### Output
 
