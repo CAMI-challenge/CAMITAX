@@ -34,6 +34,8 @@ nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 ```
 **Warning:** This will download ~30 GB of data, expect this to run a while! `/path/to/db/folder` should have >100 GB of available disk space. Note that you have to do this only once; specify the location in all future CAMITAX runs.
 
+**Warning:** To foster reproducibility, we strongly recommend that you use our "official" [releases](https://doi.org/10.5281/zenodo.1250043) and we will continue to provide stable and versioned updates in the future.
+
 ### Input
 
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
@@ -45,6 +47,8 @@ nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i 
 ### Output
 
 CAMITAX outputs a tab-seperated file `camitax.tsv` containing the individual taxon assignments in the `data` folder.
+
+**Warning:** While CAMITAX is built around computational reproducibility, results might sometimes be slightly different from run to run (but of comparable quality) because software used within (e.g. CheckM) are non-deterministic.
 
 *Again, if you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
