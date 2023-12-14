@@ -50,6 +50,7 @@ workflow {
  */
 process mash {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -60,7 +61,7 @@ process mash {
     tuple val(id), path("${id}.mash.taxIDs.txt"), emit: mash_ANImax_taxIDs
 
     script:
-    mash_index = "${db}/mash/RefSeq_20180510.msh"
+    mash_index = "${db}/mash/RefSeq_20190108.msh"
 
     """
     mash dist ${mash_index} ${genome} | sort -gk3 > ${id}.mash.sorted
@@ -75,6 +76,7 @@ process mash {
  */
 process checkm {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -100,6 +102,7 @@ process checkm {
 
 process dada2 {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -155,6 +158,7 @@ process prodigal {
 
 process centrifuge {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -164,7 +168,7 @@ process centrifuge {
     tuple val(id), path("${id}.centrifuge.taxIDs.txt"), emit: centrifuge_taxIDs
 
     script:
-    centrifuge_index = "${db}/centrifuge/proGenomes_20180510"
+    centrifuge_index = "${db}/centrifuge/proGenomes_20190108"
 
     """
     centrifuge -p ${task.cpus} -f -x ${centrifuge_index} ${genes} > ${id}.centrifuge.out
@@ -174,6 +178,7 @@ process centrifuge {
 
 process kaiju {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -183,8 +188,8 @@ process kaiju {
     tuple val(id), path("${id}.kaiju.taxIDs.txt"), emit: kaiju_taxIDs
 
     script:
-    kaiju_index = "${db}/kaiju/proGenomes_20180510.fmi"
-    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
+    kaiju_index = "${db}/kaiju/proGenomes_20190108.fmi"
+    ncbi_nodes = "${db}/taxonomy/nodes_20190108.dmp"
 
     """
     kaiju -p -z ${task.cpus} -t ${ncbi_nodes} -f ${kaiju_index} -i ${genes} > ${id}.kaiju.out
@@ -196,6 +201,7 @@ process kaiju {
 
 process taxonomy {
     tag "${id}"
+    publishDir "data/${id}"
 
     input:
     file db
@@ -205,9 +211,9 @@ process taxonomy {
     tuple val(id), path("${id}.summary"), emit: camitax_summaries
 
     script:
-    mash_ids = "${db}/mash/RefSeq_20180510.ids"
-    ncbi_names = "${db}/taxonomy/names_20180510.dmp"
-    ncbi_nodes = "${db}/taxonomy/nodes_20180510.dmp"
+    mash_ids = "${db}/mash/RefSeq_20190108.ids"
+    ncbi_names = "${db}/taxonomy/names_20190108.dmp"
+    ncbi_nodes = "${db}/taxonomy/nodes_20190108.dmp"
 
     """
     camitaxonomy.py --names ${ncbi_names} \

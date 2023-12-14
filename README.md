@@ -17,11 +17,9 @@ CAMITAX considers the lowest consistent assignment as the longest unambiguous ro
 
 ## Requirements
 
-All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/). This is the recommended way to run CAMITAX.
+All you need is [Nextflow](https://www.nextflow.io/) and [Docker](https://www.docker.com/) (or [Singularity](https://singularity.lbl.gov/)). This is the recommended way to run CAMITAX and (by default) CAMITAX requires 8 CPU cores and 24 GB of memory.
 
-**Plan B:** If Docker is no option, try [Singularity](https://singularity.lbl.gov/) instead. Please first consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/singularity.html) and then adjust the [CAMITAX configuration](nextflow.config) accordingly. In a nutshell, disable Docker and enable Singularity by replacing `docker.enabled = true` with `singularity.enabled = true`, and you should be all set.
-
-**Plan C:** As a last resort, you may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself. We suggest [Bioconda](https://bioconda.github.io/) for this tedious task, the following (untested) code snippet should work: ``conda install --yes --channel "bioconda" --file requirements.txt``
+**Plan B:** You may run CAMITAX without software containers. However, this is not recommended and you have to install [all software dependencies](requirements.txt) by yourself.
 
 *If you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
@@ -36,21 +34,26 @@ nextflow run CAMI-challenge/CAMITAX/init.nf --db /path/to/db/folder
 ```
 **Warning:** This will download ~30 GB of data, expect this to run a while! `/path/to/db/folder` should have >100 GB of available disk space. Note that you have to do this only once; specify the location in all future CAMITAX runs.
 
+**Warning:** To foster reproducibility, we strongly recommend that you use our "official" releases and we will continue to provide stable and versioned updates in the future.
+
 ### Input
 
 CAMITAX expects all input genomes in (genomic/nucleotide multi-)FASTA format.
 If your input genomes are in the folder `input/` with file extension `.fasta`, please run:
 ```
-nextflow run CAMI-challenge/CAMITAX --db /path/to/db/folder --i input --x fasta
+nextflow run CAMI-challenge/CAMITAX -profile docker --db /path/to/db/folder --i input --x fasta
 ```
+If you want to use Singularity instead of Docker (without sudo), please replace `docker` with `singularity` as profile.
 
 ### Output
 
 CAMITAX outputs a tab-seperated file `camitax.tsv` containing the individual taxon assignments in the `data` folder.
 
+**Warning:** While CAMITAX is built around computational reproducibility, results might sometimes be slightly different from run to run (but of comparable quality) because software used within (e.g. CheckM) are non-deterministic.
+
 *Again, if you need any help or further guidance: Please [get in touch](https://github.com/CAMI-challenge/CAMITAX/issues)!*
 
 ## Citation
 
-* Bremges, Fritz, McHardy (2019). **CAMITAX: Taxon labels for microbial genomes.** *bioRxiv*, 532473 (preprint). doi:[10.1101/532473](https://doi.org/10.1101/532473)
+* Bremges, Fritz & McHardy (2020). **CAMITAX: Taxon labels for microbial genomes.** *GigaScience*, 9, 1:1–7. doi:[10.1093/gigascience/giz154](https://doi.org/10.1093/gigascience/giz154)
 * Sczyrba, Hofmann, Belmann, *et al.* (2017). **Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software.** *Nature Methods*, 14, 11:1063–1071. doi:[10.1038/nmeth.4458](https://doi.org/10.1038/nmeth.4458)
