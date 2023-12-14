@@ -1,6 +1,6 @@
-centrifuge=1.0.3
-checkm-genome=1.0.11
-bioconductor-dada2=1.6.0
-kaiju=1.6.2
-mash=2.0
-prodigal=2.6.3
+centrifuge==1.0.4--hd03093a_0
+checkm-genome==1.2.2--pyhdfd78af_1
+bioconductor-dada2==1.28
+kaiju==1.6.2=pl5.22.0_0
+mash==2.0=gsl2.2_2
+prodigal==2.6.3=0
