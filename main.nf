@@ -1,5 +1,6 @@
 #!/usr/bin/env nextflow
-camitax_version = 'v0.6.2'
+nextflow.enable.dsl = 2
+camitax_version = 'v0.7.0'
 println """
  ▄████▄   ▄▄▄       ███▄ ▄███▓ ██▓▄▄▄█████▓ ▄▄▄      ▒██   ██▒
 ▒██▀ ▀█  ▒████▄    ▓██▒▀█▀ ██▒▓██▒▓  ██▒ ▓▒▒████▄    ▒▒ █ █ ▒░
@@ -18,45 +19,55 @@ params.x = 'fasta'
 params.db = "camitax/db"
 params.dada2_db = 'rdp'
 
-Channel
-    .fromPath("${params.i}/*.${params.x}")
-    .map { file -> [file.baseName, file] }
-    .into {
-        input_genomes;
-        mash_genomes;
-        prodigal_genomes;
-        checkm_genomes
-    }
 
-println("Input genomes:")
-input_genomes.println { it[0] + " - " + it[1] }
-db = Channel.fromPath( "${params.db}", type: 'dir').first()
+workflow {
 
+    files = Channel
+        .fromPath("${params.i}/*.${params.x}")
+        .map { file -> [file.baseName, file] }
+    db = Channel.fromPath( "${params.db}", type: 'dir').first()
+    mash(db, files)
+    prodigal(files)
+    centrifuge(db, prodigal.out.fna_centrifuge)
+    kaiju(db, prodigal.out.faa_kaiju)
+    checkm(db, files)
+    dada2_lineage = dada2(db, checkm.out.rRNA_fasta)
+    
+    id_collection = mash.out.mash_ANImax    .join(
+    mash.out.mash_ANImax_taxIDs)            .join(
+    dada2.out.dada2_lineage)                .join(
+    centrifuge.out.centrifuge_taxIDs)       .join(
+    kaiju.out.kaiju_taxIDs)                 .join(
+    checkm.out.checkm_lineage)              .join(
+    prodigal.out.genes_cnt)
+    
+    taxonomy(db, id_collection)
+    summary(taxonomy.out.camitax_summaries.collect())
+}
 
 /********
  * (A) Genome-distance based assignment
  */
 process mash {
     tag "${id}"
-    publishDir "data/${id}"
 
     input:
     file db
-    set val(id), file(genome) from mash_genomes
+    tuple val(id), file(genome)
 
     output:
-    set id, "${id}.mash.ANImax.txt", "${id}.mash.taxIDs.txt" into mash_ANImax_taxIDs
+    tuple val(id), path("${id}.mash.ANImax.txt"), emit: mash_ANImax
+    tuple val(id), path("${id}.mash.taxIDs.txt"), emit: mash_ANImax_taxIDs
 
     script:
     mash_index = "${db}/mash/RefSeq_20180510.msh"
 
     """
-    mash dist ${mash_index} ${genome} | sort -gk3 > ${genome.baseName}.mash.sorted
-    head -n 1 ${genome.baseName}.mash.sorted | awk '{print 1-\$3}' > ${genome.baseName}.mash.ANImax.txt
-    awk '\$3 <= 0.05' ${genome.baseName}.mash.sorted | cut -f1 -d'_' > ${genome.baseName}.mash.taxIDs.txt
+    mash dist ${mash_index} ${genome} | sort -gk3 > ${id}.mash.sorted
+    head -n 1 ${id}.mash.sorted | awk '{print 1-\$3}' > ${id}.mash.ANImax.txt
+    awk '\$3 <= 0.05' ${id}.mash.sorted | cut -f1 -d'_' > ${id}.mash.taxIDs.txt
     """
 }
-
 
 /********
  * (B) 16S rRNA gene-based assignment, and
@@ -64,43 +75,38 @@ process mash {
  */
 process checkm {
     tag "${id}"
-    publishDir "data/${id}"
 
     input:
     file db
-    set val(id), file(genome) from checkm_genomes
+    tuple val(id), file(genome)
 
     output:
-    set id, "${id}.ssu.fna" into rRNA_fasta
-    set id, "${id}.checkm.tsv" into checkm_lineage
+    tuple val(id), path("${id}.ssu.fna"), emit: rRNA_fasta
+    tuple val(id), path("${id}.checkm.tsv"), emit: checkm_lineage
 
     script:
     checkm_db = "${db}/checkm/"
 
     """
-    # Set CheckM root data location
-    echo ${checkm_db} | checkm data setRoot ${checkm_db}
-
     # Extract 16S rRNA gene sequences with Nhmmer
     checkm ssu_finder -t ${task.cpus} -x ${params.x} ${genome} . ssu_finder 2>&1
     ln -s ssu_finder/ssu.fna ${id}.ssu.fna
 
     # Phylogenetic placement onto reduced reference tree
     checkm lineage_wf -t ${task.cpus} --reduced_tree -x ${params.x} . checkm
-    checkm qa -o 2 --tab_table checkm/lineage.ms checkm > ${id}.checkm.tsv
+    checkm qa -q -o 2 --tab_table checkm/lineage.ms checkm > ${id}.checkm.tsv
     """
 }
 
 process dada2 {
     tag "${id}"
-    publishDir "data/${id}"
 
     input:
     file db
-    set val(id), file(fasta) from rRNA_fasta
+    tuple val(id), file(genome)
 
     output:
-    set id, "${id}.dada2.txt" into dada2_lineage
+    tuple val(id), path("${id}.dada2.txt"), emit: dada2_lineage
 
     script:
     if ( params.dada2_db == 'silva' ) {
@@ -118,7 +124,7 @@ process dada2 {
     library(dada2)
     set.seed(42)
 
-    seqs <- paste(Biostrings::readDNAStringSet("${fasta}"))
+    seqs <- paste(Biostrings::readDNAStringSet("${genome}"))
     tt <- data.frame(Batman = "NA;NA;NA;NA;NA;NA;NA")
     try(tt <- addSpecies(assignTaxonomy(seqs, "${dada2_train_set}", minBoot=80), "${dada2_species_assignment}"))
     write.table(tt, "${id}.dada2.txt", quote=F, sep=";", row.names=F, col.names=F)
@@ -134,12 +140,12 @@ process prodigal {
     publishDir "data/${id}"
 
     input:
-    set val(id), file(genome) from prodigal_genomes
+    tuple val(id), file(genome)
 
     output:
-    set id, "${id}.genes.faa" into faa_kaiju
-    set id, "${id}.genes.fna" into fna_centrifuge
-    set id, "${id}.genes.cnt" into genes_cnt
+    tuple val(id), path("${id}.genes.faa"), emit: faa_kaiju
+    tuple val(id), path("${id}.genes.fna"), emit: fna_centrifuge
+    tuple val(id), path("${id}.genes.cnt"), emit: genes_cnt
 
     """
     prodigal -a ${id}.genes.faa -d ${id}.genes.fna -i ${genome}
@@ -149,14 +155,13 @@ process prodigal {
 
 process centrifuge {
     tag "${id}"
-    publishDir "data/${id}"
 
     input:
     file db
-    set val(id), file(genes) from fna_centrifuge
+    tuple val(id), file(genes)
 
     output:
-    set id, "${id}.centrifuge.taxIDs.txt" into centrifuge_taxIDs
+    tuple val(id), path("${id}.centrifuge.taxIDs.txt"), emit: centrifuge_taxIDs
 
     script:
     centrifuge_index = "${db}/centrifuge/proGenomes_20180510"
@@ -169,14 +174,13 @@ process centrifuge {
 
 process kaiju {
     tag "${id}"
-    publishDir "data/${id}"
 
     input:
     file db
-    set val(id), file(genes) from faa_kaiju
+    tuple val(id), file(genes)
 
     output:
-    set id, "${id}.kaiju.taxIDs.txt" into kaiju_taxIDs
+    tuple val(id), path("${id}.kaiju.taxIDs.txt"), emit: kaiju_taxIDs
 
     script:
     kaiju_index = "${db}/kaiju/proGenomes_20180510.fmi"
@@ -189,27 +193,16 @@ process kaiju {
 }
 
 
-/********
- * (E) Classification algorithm
- */
-mash_ANImax_taxIDs .join(
-dada2_lineage      .join(
-centrifuge_taxIDs  .join(
-kaiju_taxIDs       .join(
-checkm_lineage     .join(
-genes_cnt    ))))) .set{ id_collection }
 
 process taxonomy {
     tag "${id}"
-    publishDir "data/${id}"
-    container = 'python'
 
     input:
     file db
-    set val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage), file(genes_cnt) from id_collection
+    tuple val(id), file(mash_ANImax), file(mash_taxIDs), file(dada2_lineage), file(centrifuge_taxIDs), file(kaiju_taxIDs), file(checkm_lineage), file(genes_cnt)
 
     output:
-    file "${id}.summary" into camitax_summaries
+    tuple val(id), path("${id}.summary"), emit: camitax_summaries
 
     script:
     mash_ids = "${db}/mash/RefSeq_20180510.ids"
@@ -234,10 +227,9 @@ process taxonomy {
 process summary {
     tag 'The Final Countdown'
     publishDir 'data'
-    container = 'python'
 
     input:
-    file summaryList from camitax_summaries.collect()
+    file summaryList
 
     output:
     file "camitax.tsv"
@@ -254,3 +246,4 @@ process summary {
     done
     """
 }
+

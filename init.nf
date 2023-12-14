@@ -1,6 +1,15 @@
 #!/usr/bin/env nextflow
-
+nextflow.enable.dsl = 2
 params.db = 'camitax/db'
+
+workflow {
+    cache_taxonomy()
+    cache_mash_db()
+    cache_dada2_db()
+    cache_centrifuge_db()
+    cache_kaiju_db()
+    cache_checkm_db()
+}
 
 process cache_taxonomy {
     storeDir "${params.db}"
